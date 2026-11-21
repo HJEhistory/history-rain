@@ -34,6 +34,27 @@ button.btn.ghost{background:var(--card);color:var(--ink)}
 button.btn:disabled{opacity:.4}
 #cfgwarn{background:#7a2e3a;padding:calc(10px * var(--ui-scale));border-radius:calc(10px * var(--ui-scale));display:none;margin-top:calc(10px * var(--ui-scale));font-size:calc(14px * var(--ui-scale))}
 
+/* 관리자 로그인 화면 */
+#adminLoginBox{
+  max-width:calc(440px * var(--ui-scale));
+  width:100%;
+  margin:auto;
+  padding:calc(24px * var(--ui-scale));
+  border-radius:calc(16px * var(--ui-scale));
+  background:rgba(16,22,36,.45);
+  border:1px dashed var(--gold);
+  display:none;
+}
+#adminLoginBox input{
+  width:100%;
+  padding:calc(11px * var(--ui-scale)) calc(14px * var(--ui-scale));
+  border-radius:calc(10px * var(--ui-scale));
+  border:0;
+  margin:calc(10px * var(--ui-scale)) 0;
+  font-family:inherit;
+  font-size:calc(16px * var(--ui-scale));
+}
+
 /* 가로형 입장 화면 */
 #joinGrid{display:grid;grid-template-columns:calc(280px * var(--ui-scale)) 1fr;gap:calc(24px * var(--ui-scale));align-items:center;margin:auto 0}
 #pvwrap{display:flex;flex-direction:column;gap:calc(10px * var(--ui-scale));align-items:center}
@@ -84,7 +105,17 @@ canvas{width:100%;height:100%;display:block;touch-action:none}
   <!-- 입장 화면 -->
   <section class="screen on" id="join">
     <h1>부여 글자비</h1>
-    <p class="sub">하늘에서 내려오는 글자를 캐릭터 머리로 받아 부여의 명소를 맞혀 보세요.</p>
+    <p class="sub" id="joinSub">하늘에서 내려오는 글자를 캐릭터 머리로 받아 부여의 명소를 맞혀 보세요.</p>
+
+    <!-- 관리자 전용 비밀번호 관전 입장 -->
+    <div id="adminLoginBox">
+      <div style="font-size:calc(20px * var(--ui-scale));font-weight:700;color:var(--gold)">관리자 관전 접속</div>
+      <p class="sub" style="margin-top:calc(6px * var(--ui-scale))">참가자 캐릭터 없이 관전 및 게임 진행을 관리합니다.</p>
+      <input id="adminEnterPass" type="password" placeholder="관리자 비밀번호 입력" autocomplete="current-password">
+      <button class="btn" id="adminEnterBtn" style="width:100%">비밀번호 확인 후 관전 입장</button>
+    </div>
+
+    <!-- 일반 참가자 입장 -->
     <div id="joinGrid">
       <div id="pvwrap">
         <canvas id="pv" width="20" height="23"></canvas>
@@ -110,8 +141,7 @@ canvas{width:100%;height:100%;display:block;touch-action:none}
         <p class="sub" style="margin-top:calc(10px * var(--ui-scale))">정답에 없는 글자를 머리로 받으면 -5점이에요.</p>
       </div>
       <div id="admin">
-        <div style="margin-bottom:calc(8px * var(--ui-scale));font-weight:700">관리자 모드</div>
-        <input id="pass" type="password" placeholder="관리자 비밀번호">
+        <div style="margin-bottom:calc(8px * var(--ui-scale));font-weight:700;color:var(--gold)">관리자 관전 제어</div>
         <select id="qcount">
           <option value="10">10문제</option>
           <option value="15" selected>15문제</option>
@@ -166,6 +196,7 @@ const firebaseConfig = {
   appId: "1:905410123901:web:a1e2c922cca921ae8d7914"
 };
 const ADMIN_PASS="buyeo1234";
+const ADMIN_QUERY="admin"; // 예: ?admin (원하는 주소 파라미터명으로 변경 가능)
 const ROOM="room1";
 const QUESTIONS=[
  {a:"낙화암",h:"백제 궁녀들의 전설이 전해지는 백마강변 절벽",d:"삼천궁녀가 몸을 던졌다고 전해지는 부소산 절벽입니다."},
@@ -208,8 +239,15 @@ const W=1280,H=720,PY=H-95,FALL=6200,SPAWN=520,EXTRA=4,ANS_MS=5000;
 
 const $=s=>document.querySelector(s);
 const show=id=>document.querySelectorAll('.screen').forEach(e=>e.classList.toggle('on',e.id===id));
-const isAdmin=new URLSearchParams(location.search).has('admin');
+const isAdminPage=new URLSearchParams(location.search).has(ADMIN_QUERY);
+let isAdmin=false;
 if(!firebaseConfig.apiKey)$('#cfgwarn').style.display='block';
+
+if(isAdminPage){
+  $('#joinGrid').style.display='none';
+  $('#adminLoginBox').style.display='block';
+  $('#joinSub').textContent='관리자 전용 관전 화면입니다. 비밀번호를 입력해 접속하세요.';
+}
 
 /* 가로/세로 비율 자동 조정 */
 const appEl=$('#app');
@@ -323,28 +361,35 @@ const posMap={},fx=[];let lastX=-1,late=false,gotFirst=false,entered=false;
 const base=p=>ref(db,`${ROOM}/${p}`);
 const now=()=>Date.now()+offset;
 
-$('#enter').onclick=async()=>{
+async function connectSession(asAdmin){
   if(!firebaseConfig.apiKey||entered)return;
   entered=true;
+  isAdmin=asAdmin;
   $('#enter').disabled=true;
+  $('#adminEnterBtn').disabled=true;
   try{
     const app=initializeApp(firebaseConfig);
     db=firebaseConfig.databaseURL?getDatabase(app,firebaseConfig.databaseURL):getDatabase(app);
     const cred=await signInAnonymously(getAuth(app));uid=cred.user.uid;
     onValue(ref(db,'.info/serverTimeOffset'),s=>offset=s.val()||0);
-    const me=base('players/'+uid);
-    await set(me,{name:myName,look:look,score:0});
-    onDisconnect(me).remove();
-    const mp=base('pos/'+uid);await set(mp,Math.round(W/2));onDisconnect(mp).remove();
+    if(!isAdmin){
+      const me=base('players/'+uid);
+      await set(me,{name:myName,look:look,score:0});
+      onDisconnect(me).remove();
+      const mp=base('pos/'+uid);await set(mp,Math.round(W/2));onDisconnect(mp).remove();
+    }
     onChildAdded(base('pos'),s=>{posMap[s.key]=s.val()});
     onChildChanged(base('pos'),s=>{posMap[s.key]=s.val()});
     onChildRemoved(base('pos'),s=>{delete posMap[s.key];delete vis[s.key]});
     onValue(base('players'),s=>{players=s.val()||{};renderLobby();renderLB()});
     onValue(base('state'),s=>{
       state=s.val();
-      const fresh=state&&state.status==='playing'&&state.qIndex===0&&typeof state.startedAt==='number'&&state.startedAt>now();
-      if(!gotFirst){gotFirst=true;late=!!state&&state.status!=='lobby'&&!fresh;if(late)update(me,{wait:true})}
-      else if(late&&(!state||state.status==='lobby'||fresh)){late=false;update(me,{wait:null})}
+      if(!isAdmin){
+        const me=base('players/'+uid);
+        const fresh=state&&state.status==='playing'&&state.qIndex===0&&typeof state.startedAt==='number'&&state.startedAt>now();
+        if(!gotFirst){gotFirst=true;late=!!state&&state.status!=='lobby'&&!fresh;if(late)update(me,{wait:true})}
+        else if(late&&(!state||state.status==='lobby'||fresh)){late=false;update(me,{wait:null})}
+      }
       onState();
     });
     if(isAdmin)$('#admin').style.display='block';
@@ -352,10 +397,24 @@ $('#enter').onclick=async()=>{
     requestAnimationFrame(loop);
   }catch(e){
     entered=false;
+    isAdmin=false;
     $('#enter').disabled=false;
+    $('#adminEnterBtn').disabled=false;
     alert('오류: '+(e.code||e.message||e));
   }
+}
+
+$('#enter').onclick=()=>connectSession(false);
+$('#adminEnterBtn').onclick=()=>{
+  if($('#adminEnterPass').value!==ADMIN_PASS){
+    alert('비밀번호가 맞지 않습니다.');
+    return;
+  }
+  connectSession(true);
 };
+$('#adminEnterPass').addEventListener('keydown',e=>{
+  if(e.key==='Enter')$('#adminEnterBtn').click();
+});
 
 const mini=l=>l?`<img class="px" src="${spriteURL(l)}" width="14" height="16">`:'';
 const lbRow=(p,i)=>`<div class="${p.k===uid?'me':''}"><span class="rk">${i+1}</span>${mini(p.look)}<span>${p.name}</span><b>${p.score||0}</b></div>`;
@@ -365,14 +424,17 @@ function renderLB(){
   $('#lb').innerHTML=arr.slice(0,10).map(lbRow).join('')+(mi>=10?'<div style="opacity:.6">⋮</div>'+lbRow(arr[mi],mi):'');
 }
 function renderLobby(){
-  const list=Object.values(players);
+  const list=Object.values(players).filter(p=>!p.wait);
   $('#lobbyList').innerHTML=list.map(p=>`<span class="chip">${face(p.look)} ${p.name}</span>`).join('');
-  $('#lobCount').textContent=`접속 ${list.length}명`;
-  $('#lobMsg').textContent=late?'게임이 진행 중이에요. 이번 판이 끝나면 다음 판부터 참여할 수 있어요.':isAdmin?'참가자가 모이면 게임 시작을 눌러 주세요. 3초 카운트다운 뒤 시작해요.':'관리자가 시작하면 3초 카운트다운 뒤 게임이 열려요.';
+  $('#lobCount').textContent=`참가자 ${list.length}명`;
+  if(isAdmin){
+    $('#lobMsg').textContent='관리자 관전 모드예요. 게임 시작을 누르면 3초 카운트다운 뒤 경기가 시작되고 화면에서 관전할 수 있어요.';
+  }else{
+    $('#lobMsg').textContent=late?'게임이 진행 중이에요. 이번 판이 끝나면 다음 판부터 참여할 수 있어요.':'관리자가 시작하면 3초 카운트다운 뒤 게임이 열려요.';
+  }
 }
-function adminOK(){if($('#pass').value!==ADMIN_PASS){alert('비밀번호가 맞지 않습니다.');return false}return true}
 $('#startBtn').onclick=async()=>{
-  if(!adminOK())return;
+  if(!isAdmin)return;
   if(state&&state.status==='playing'&&!confirm('진행 중인 게임을 중단하고 새로 시작할까요?'))return;
   const u={};Object.keys(players).forEach(k=>u['players/'+k+'/score']=0);
   const cnt=Math.min(QUESTIONS.length,+$('#qcount').value||15);
@@ -382,13 +444,12 @@ $('#startBtn').onclick=async()=>{
   await update(base(''),u);
 };
 const toLobby=()=>update(base(''),{state:null,collected:null});
-const askAdmin=()=>prompt('관리자 비밀번호')===ADMIN_PASS;
-$('#resetBtn').onclick=async()=>{if(adminOK())await toLobby()};
-$('#abort').onclick=async()=>{if(confirm('게임을 중단하고 대기실로 돌아갈까요?')&&askAdmin())await toLobby()};
-$('#backBtn').onclick=async()=>{if(askAdmin())await toLobby()};
+$('#resetBtn').onclick=async()=>{if(isAdmin)await toLobby()};
+$('#abort').onclick=async()=>{if(isAdmin&&confirm('게임을 중단하고 대기실로 돌아갈까요?'))await toLobby()};
+$('#backBtn').onclick=async()=>{if(isAdmin)await toLobby()};
 
 function onState(){
-  if(!state||state.status==='lobby'||late){
+  if(!state||state.status==='lobby'||(!isAdmin&&late)){
     show('lobby');$('#overlay').classList.remove('on');
     if(!state||state.status==='lobby')watchQ=-1;
     renderLobby();return;
@@ -459,6 +520,7 @@ function checkDone(){
   }
 }
 async function claim(i,ch,x,y){
+  if(isAdmin)return;
   if(!state||state.status!=='playing')return;
   if(pending.has(i)||claiming.has(i)||collected[i])return;
   claiming.add(i);
@@ -506,11 +568,12 @@ function advance(){
 const cv=$('#cv'),g=cv.getContext('2d');
 let px=W/2,dir=0,tx=null,lastPush=0;
 addEventListener('keydown',e=>{
+  if(isAdmin)return;
   if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A'){dir=-1;tx=null}
   if(e.key==='ArrowRight'||e.key==='d'||e.key==='D'){dir=1;tx=null}
 });
 addEventListener('keyup',e=>{if(['ArrowLeft','ArrowRight','a','d','A','D'].includes(e.key))dir=0});
-const ptr=e=>{const r=cv.getBoundingClientRect();tx=((e.clientX-r.left)/r.width)*W;dir=0};
+const ptr=e=>{if(isAdmin)return;const r=cv.getBoundingClientRect();tx=((e.clientX-r.left)/r.width)*W;dir=0};
 cv.addEventListener('pointerdown',ptr);
 cv.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='touch')ptr(e)});
 
@@ -518,18 +581,20 @@ cv.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='touch')ptr(
 let last=performance.now();
 function loop(t){
   const dt=Math.min(.05,(t-last)/1000);last=t;
-  const opx=px;
-  if(dir!==0)px+=dir*680*dt;
-  else if(tx!==null)px+=(tx-px)*Math.min(1,dt*14);
-  px=Math.max(50,Math.min(W-50,px));
-  if(Math.abs(px-opx)>.3){meMove.m=performance.now();meMove.d=Math.sign(px-opx)}
-  if(db&&uid&&Date.now()-lastPush>100&&Math.round(px)!==lastX){
-    lastPush=Date.now();lastX=Math.round(px);set(base('pos/'+uid),lastX).catch(()=>{});
+  if(!isAdmin){
+    const opx=px;
+    if(dir!==0)px+=dir*680*dt;
+    else if(tx!==null)px+=(tx-px)*Math.min(1,dt*14);
+    px=Math.max(50,Math.min(W-50,px));
+    if(Math.abs(px-opx)>.3){meMove.m=performance.now();meMove.d=Math.sign(px-opx)}
+    if(db&&uid&&Date.now()-lastPush>100&&Math.round(px)!==lastX){
+      lastPush=Date.now();lastX=Math.round(px);set(base('pos/'+uid),lastX).catch(()=>{});
+    }
   }
   draw();advance();requestAnimationFrame(loop);
 }
 function draw(){
-  if(late){g.clearRect(0,0,W,H);return}
+  if(!isAdmin&&late){g.clearRect(0,0,W,H);return}
   g.clearRect(0,0,W,H);
   g.fillStyle='rgba(233,196,106,.9)';g.beginPath();g.arc(1060,155,34,0,7);g.fill();
   g.fillStyle='rgba(255,255,255,.06)';g.fillRect(0,PY+25,W,H);
@@ -550,7 +615,7 @@ function draw(){
         g.fillStyle='#cfe8da';g.beginPath();g.arc(x,y,26*L,0,7);g.fill();
         g.strokeStyle='#e8789f';g.lineWidth=2.5;g.stroke();
         g.fillStyle='#1d2a3f';g.fillText(ch,x,y+1);
-        if(hitHead(x,y,px,S,L))claim(i,ch,x,y);
+        if(!isAdmin&&hitHead(x,y,px,S,L))claim(i,ch,x,y);
       }
     }
   }
@@ -566,7 +631,7 @@ function draw(){
     g.globalAlpha=1;
   }
   act.sort((a,b)=>(a[0]===uid)-(b[0]===uid)).forEach(([k,p])=>{
-    const mine=k===uid,tx0=posMap[k]??W/2,v=vis[k]||(vis[k]={x:tx0,m:0,d:1});
+    const mine=!isAdmin&&k===uid,tx0=posMap[k]??W/2,v=vis[k]||(vis[k]={x:tx0,m:0,d:1});
     if(!mine){const o=v.x;v.x+=(tx0-v.x)*.3;if(Math.abs(v.x-o)>.25){v.m=performance.now();v.d=Math.sign(v.x-o)}}
     const dx=mine?px:v.x;g.globalAlpha=mine?1:.72;
     if(p.look)drawChar(g,spriteCv(p.look),dx,mine?meMove:v,S);
@@ -580,7 +645,8 @@ function draw(){
     g.textAlign='center';g.textBaseline='middle';g.fillStyle='#e9c46a';g.font="700 120px 'Gowun Batang',serif";g.fillText(sec,W/2,H/2-15);
     g.font="22px 'Gowun Batang',serif";g.fillStyle='#f3efe4';g.fillText('곧 시작합니다',W/2,H/2+85);
   }
-  if(players[uid])$('#myscore').textContent=`내 점수 ${players[uid].score||0}`;
+  if(isAdmin)$('#myscore').textContent='관전 모드';
+  else if(players[uid])$('#myscore').textContent=`내 점수 ${players[uid].score||0}`;
 }
 </script>
 </body>
