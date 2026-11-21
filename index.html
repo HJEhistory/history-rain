@@ -8,54 +8,66 @@
 <style>
 :root{--bg:#1d2a3f;--bg2:#3b5668;--ink:#f3efe4;--jade:#cfe8da;--lotus:#e8789f;--gold:#e9c46a;--card:rgba(255,255,255,.09)}
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:'Gowun Batang',serif;-webkit-user-select:none;user-select:none;touch-action:manipulation}
-body{display:flex;justify-content:center;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
-#app{width:100%;max-width:440px;height:100%;position:relative;background:linear-gradient(#1d2a3f,#3b5668 85%,#4f6e72)}
-.screen{position:absolute;inset:0;display:none;flex-direction:column;padding:20px;overflow:auto}
+html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--ink);font-family:'Gowun Batang',serif;-webkit-user-select:none;user-select:none;touch-action:manipulation;overflow:hidden}
+body{display:flex;align-items:center;justify-content:center;padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
+#app{width:min(100vw,1280px);height:min(100vh,calc(100vw * 9 / 16));max-height:100vh;position:relative;background:linear-gradient(#1d2a3f,#3b5668 85%,#4f6e72);box-shadow:0 12px 40px rgba(0,0,0,.45);border-radius:12px;overflow:hidden}
+@media (max-aspect-ratio: 16/10){
+  #app{width:min(100vw,calc(100vh * 16 / 9));height:min(100vh,calc(100vw * 9 / 16))}
+}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;padding:20px 28px;overflow:auto}
 .screen.on{display:flex}
-h1{font-size:34px;margin:12px 0 4px;letter-spacing:.04em}
-.sub{opacity:.75;margin:0 0 18px}
-.row{display:flex;gap:10px;align-items:center;margin:16px 0}
-.name{flex:1;padding:12px 14px;border-radius:12px;background:var(--card);font-size:20px}
-button.btn{font-family:inherit;font-size:18px;padding:12px 18px;border-radius:12px;border:0;background:var(--lotus);color:#2a1020;font-weight:700;cursor:pointer}
+h1{font-size:30px;margin:4px 0;letter-spacing:.04em}
+.sub{opacity:.78;margin:0 0 12px;font-size:15px}
+.row{display:flex;gap:10px;align-items:center;margin:10px 0}
+.name{flex:1;padding:10px 14px;border-radius:12px;background:var(--card);font-size:19px}
+button.btn{font-family:inherit;font-size:16px;padding:10px 18px;border-radius:12px;border:0;background:var(--lotus);color:#2a1020;font-weight:700;cursor:pointer}
 button.btn.ghost{background:var(--card);color:var(--ink)}
 button.btn:disabled{opacity:.4}
 #cfgwarn{background:#7a2e3a;padding:10px;border-radius:10px;display:none;margin-top:10px;font-size:14px}
-#lobbyList{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
-.chip{background:var(--card);padding:6px 10px;border-radius:999px;font-size:15px}
-#admin{margin-top:auto;padding:12px;border:1px dashed var(--gold);border-radius:12px;display:none}
-#admin input,#admin select{width:100%;padding:10px;border-radius:8px;border:0;margin-bottom:8px;font-family:inherit}
-#admin .row{margin:6px 0}
-#game{padding:0}
-#hud{position:absolute;top:0;left:0;right:0;padding:10px 12px;background:linear-gradient(rgba(16,22,36,.85),transparent);z-index:2;pointer-events:none}
-#hint{font-size:17px;line-height:1.35}
-#slots{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
-.slot{min-width:34px;height:38px;border-radius:8px;border:2px solid var(--jade);display:grid;place-items:center;font-size:22px;color:#1d2a3f;background:transparent}
-.slot.f{background:var(--jade)}
-#meta{display:flex;justify-content:space-between;font-size:13px;opacity:.8;margin-top:6px}
-canvas{width:100%;height:100%;display:block;touch-action:none}
-#overlay{position:absolute;inset:0;z-index:3;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(20,28,44,.88);padding:24px}
-#overlay.on{display:flex}
-#ans{font-size:56px;font-weight:700;color:var(--gold);letter-spacing:.08em;margin:6px 0}
-#desc{max-width:320px;line-height:1.5}
-#board{margin-top:16px;text-align:left;font-size:17px;min-width:220px}
-#board div{display:flex;justify-content:space-between;gap:20px;padding:3px 0}
-.px{image-rendering:pixelated}
-#pvwrap{display:flex;gap:14px;align-items:center;margin-bottom:8px}
-#pv{width:120px;height:138px;image-rendering:pixelated;background:var(--card);border-radius:14px}
-.prow{display:flex;gap:6px;align-items:center;margin:6px 0;flex-wrap:wrap}
-.prow b{width:54px;font-weight:400;opacity:.75;font-size:14px}
-.opt{padding:6px 10px;border-radius:10px;border:2px solid transparent;background:var(--card);color:var(--ink);font-family:inherit;font-size:14px;cursor:pointer}
+
+/* 가로형 입장 화면 */
+#joinGrid{display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:center;margin:auto 0}
+#pvwrap{display:flex;flex-direction:column;gap:10px;align-items:center}
+#pv{width:130px;height:150px;image-rendering:pixelated;background:var(--card);border-radius:14px}
+.prow{display:flex;gap:6px;align-items:center;margin:8px 0;flex-wrap:wrap}
+.prow b{width:64px;font-weight:400;opacity:.8;font-size:14px}
+.opt{padding:6px 11px;border-radius:10px;border:2px solid transparent;background:var(--card);color:var(--ink);font-family:inherit;font-size:14px;cursor:pointer}
 .opt.sel{border-color:var(--lotus)}
 .opt.sw{width:30px;height:30px;padding:0;border-radius:50%}
-#enter{margin-top:14px}
-#lb{position:absolute;left:6px;top:calc(140px + env(safe-area-inset-top,0px));z-index:2;pointer-events:none;font-size:12px;line-height:1.3;background:rgba(16,22,36,.5);border-radius:10px;padding:5px 7px;min-width:104px;max-width:150px}
-#lb div{display:flex;align-items:center;gap:4px;white-space:nowrap;padding:1px 0}
+#enter{margin-top:10px;align-self:flex-start;min-width:160px}
+
+/* 가로형 대기실 */
+#lobbyGrid{display:grid;grid-template-columns:1.1fr .9fr;gap:24px;flex:1;min-height:0;align-items:start}
+#lobbyList{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;max-height:220px;overflow:auto}
+.chip{background:var(--card);padding:6px 12px;border-radius:999px;font-size:15px}
+#admin{padding:14px;border:1px dashed var(--gold);border-radius:12px;display:none;background:rgba(16,22,36,.35)}
+#admin input,#admin select{width:100%;padding:9px 10px;border-radius:8px;border:0;margin-bottom:8px;font-family:inherit}
+#admin .row{margin:6px 0 0}
+#lobCount{font-size:20px;margin:4px 0 6px;color:var(--gold)}
+
+/* 게임 화면 */
+#game{padding:0}
+#hud{position:absolute;top:0;left:0;right:0;padding:12px 18px 24px;background:linear-gradient(rgba(16,22,36,.88),rgba(16,22,36,.35) 70%,transparent);z-index:2;pointer-events:none;display:flex;align-items:center;justify-content:space-between;gap:16px}
+#hudLeft{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
+#hint{font-size:18px;line-height:1.35}
+#slots{display:flex;gap:7px;flex-wrap:wrap}
+.slot{min-width:38px;height:40px;border-radius:8px;border:2px solid var(--jade);display:grid;place-items:center;font-size:22px;color:#1d2a3f;background:transparent;padding:0 4px}
+.slot.f{background:var(--jade)}
+#meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:14px;opacity:.9;white-space:nowrap}
+canvas{width:100%;height:100%;display:block;touch-action:none}
+#overlay{position:absolute;inset:0;z-index:3;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(20,28,44,.9);padding:24px}
+#overlay.on{display:flex}
+#ans{font-size:52px;font-weight:700;color:var(--gold);letter-spacing:.08em;margin:4px 0}
+#desc{max-width:560px;line-height:1.5;font-size:16px}
+#board{margin-top:12px;text-align:left;font-size:16px;min-width:280px}
+#board div{display:flex;justify-content:space-between;gap:24px;padding:3px 0}
+.px{image-rendering:pixelated}
+#lb{position:absolute;left:12px;top:102px;z-index:2;pointer-events:none;font-size:13px;line-height:1.35;background:rgba(16,22,36,.55);border-radius:10px;padding:6px 10px;min-width:140px;max-width:210px}
+#lb div{display:flex;align-items:center;gap:5px;white-space:nowrap;padding:1px 0}
 #lb .me{color:var(--gold);font-weight:700}
-#lb b{margin-left:auto;padding-left:6px}
-#lb .rk{width:14px;opacity:.7}
-#lobCount{font-size:22px;margin:4px 0 8px}
-#abort{position:absolute;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:2;font-size:13px;padding:6px 10px;display:none}
+#lb b{margin-left:auto;padding-left:8px}
+#lb .rk{width:16px;opacity:.7}
+#abort{position:absolute;right:14px;bottom:12px;z-index:2;font-size:13px;padding:7px 12px;display:none}
 </style>
 </head>
 <body>
@@ -64,37 +76,43 @@ canvas{width:100%;height:100%;display:block;touch-action:none}
   <section class="screen on" id="join">
     <h1>부여 글자비</h1>
     <p class="sub">하늘에서 내려오는 글자를 캐릭터 머리로 받아 부여의 명소를 맞혀 보세요.</p>
-    <div id="pvwrap">
-      <canvas id="pv" width="20" height="23"></canvas>
-      <div style="flex:1">
-        <div class="name" id="nameBox"></div>
-        <button class="btn ghost" id="reroll" style="margin-top:8px;font-size:15px">이름 다시 받기</button>
+    <div id="joinGrid">
+      <div id="pvwrap">
+        <canvas id="pv" width="20" height="23"></canvas>
+        <div class="name" id="nameBox" style="width:100%;text-align:center"></div>
+        <button class="btn ghost" id="reroll" style="font-size:14px;padding:8px 14px">이름 다시 받기</button>
+      </div>
+      <div>
+        <div id="picker"></div>
+        <button class="btn" id="enter">입장하기</button>
+        <div id="cfgwarn">firebaseConfig 값을 먼저 채워 주세요.</div>
       </div>
     </div>
-    <div id="picker"></div>
-    <button class="btn" id="enter">입장하기</button>
-    <div id="cfgwarn">firebaseConfig 값을 먼저 채워 주세요.</div>
   </section>
 
   <!-- 대기실 -->
   <section class="screen" id="lobby">
     <h1>대기실</h1>
     <p class="sub" id="lobMsg"></p>
-    <div id="lobCount"></div>
-    <div id="lobbyList"></div>
-    <p class="sub">정답에 없는 글자를 머리로 받으면 -5점이에요.</p>
-    <div id="admin">
-      <div style="margin-bottom:8px">관리자 모드</div>
-      <input id="pass" type="password" placeholder="관리자 비밀번호">
-      <select id="qcount">
-        <option value="10">10문제</option>
-        <option value="15" selected>15문제</option>
-        <option value="20">20문제</option>
-        <option value="99">전체</option>
-      </select>
-      <div class="row">
-        <button class="btn" id="startBtn">게임 시작</button>
-        <button class="btn ghost" id="resetBtn">대기실로 초기화</button>
+    <div id="lobbyGrid">
+      <div>
+        <div id="lobCount"></div>
+        <div id="lobbyList"></div>
+        <p class="sub" style="margin-top:10px">정답에 없는 글자를 머리로 받으면 -5점이에요.</p>
+      </div>
+      <div id="admin">
+        <div style="margin-bottom:8px;font-weight:700">관리자 모드</div>
+        <input id="pass" type="password" placeholder="관리자 비밀번호">
+        <select id="qcount">
+          <option value="10">10문제</option>
+          <option value="15" selected>15문제</option>
+          <option value="20">20문제</option>
+          <option value="99">전체</option>
+        </select>
+        <div class="row">
+          <button class="btn" id="startBtn">게임 시작</button>
+          <button class="btn ghost" id="resetBtn">대기실로 초기화</button>
+        </div>
       </div>
     </div>
   </section>
@@ -102,11 +120,13 @@ canvas{width:100%;height:100%;display:block;touch-action:none}
   <!-- 게임 -->
   <section class="screen" id="game">
     <div id="hud">
-      <div id="hint"></div>
-      <div id="slots"></div>
+      <div id="hudLeft">
+        <div id="hint"></div>
+        <div id="slots"></div>
+      </div>
       <div id="meta"><span id="qno"></span><span id="myscore"></span></div>
     </div>
-    <canvas id="cv" width="440" height="760"></canvas>
+    <canvas id="cv" width="1280" height="720"></canvas>
     <div id="lb"></div>
     <button class="btn ghost" id="abort">대기실로</button>
     <div id="overlay">
@@ -114,7 +134,7 @@ canvas{width:100%;height:100%;display:block;touch-action:none}
       <div id="ans"></div>
       <div id="desc"></div>
       <div id="board"></div>
-      <button class="btn" id="backBtn" style="display:none;margin-top:16px">대기실로 돌아가기</button>
+      <button class="btn" id="backBtn" style="display:none;margin-top:14px">대기실로 돌아가기</button>
     </div>
   </section>
 </div>
@@ -175,7 +195,7 @@ const QUESTIONS=[
  {a:"연꽃",h:"한여름 궁남지를 분홍빛으로 물들이는 물가의 주인공",d:"궁남지에서는 해마다 여름이면 연꽃이 활짝 핍니다."}
 ];
 const PLACES=["부소산성","낙화암","고란사","궁남지","정림사지","백마강","수북정","구드래","신동엽","능산리","무량사","서동","선화","사비","금성산","규암","대재각","외산","성흥산","홍산"];
-const W=440,H=760,PY=H-70,FALL=5200,SPAWN=650,EXTRA=4,ANS_MS=5000;
+const W=1280,H=720,PY=H-95,FALL=6200,SPAWN=520,EXTRA=4,ANS_MS=5000;
 
 const $=s=>document.querySelector(s);
 const show=id=>document.querySelectorAll('.screen').forEach(e=>e.classList.toggle('on',e.id===id));
@@ -237,13 +257,13 @@ function spriteCv(l){
 }
 const spriteURL=l=>spriteCv(l).toDataURL();
 const face=l=>l?`<img class="px" src="${spriteURL(l)}" width="22" height="26" style="vertical-align:middle">`:'';
-const hitHead=(x,y,cx,S,L)=>(((x-cx)/(24*S+14*L))**2+((y-(PY+17-34.5*S))/(19.5*S+14*L))**2)<=1;
+const hitHead=(x,y,cx,S,L)=>(((x-cx)/(34*S+18*L))**2+((y-(PY+20-44*S))/(24*S+18*L))**2)<=1;
 const meMove={m:0,d:1},vis={};
 function drawChar(g,cv,x,st,S=1){
   const t=performance.now(),mv=t-st.m<140;let hop=0,rot=0,sx=1,sy=1;
-  if(mv){const p=Math.abs(Math.sin(t/85));hop=p*9;rot=Math.sin(t/85)*.12+st.d*.06;sy=1-.08*(1-p);sx=1+.06*(1-p)}
+  if(mv){const p=Math.abs(Math.sin(t/85));hop=p*11;rot=Math.sin(t/85)*.12+st.d*.06;sy=1-.08*(1-p);sx=1+.06*(1-p)}
   else{const b=Math.sin(t/420);sy=1+b*.035;sx=1-b*.02}
-  g.save();g.imageSmoothingEnabled=false;g.translate(x,PY+17-hop*S);g.rotate(rot);g.scale(st.d*sx*S,sy*S);g.drawImage(cv,-30,-69,60,69);g.restore();
+  g.save();g.imageSmoothingEnabled=false;g.translate(x,PY+20-hop*S);g.rotate(rot);g.scale(st.d*sx*S,sy*S);g.drawImage(cv,-38,-88,76,88);g.restore();
 }
 const rnd=n=>Math.floor(Math.random()*n);
 let look={sp:rnd(6),c:rnd(5),a:rnd(5)},myName="";
@@ -273,7 +293,7 @@ function letterAt(seed,qi,i){
     for(let j=arr.length-1;j>0;j--){const m=Math.floor(rGen()*(j+1));[arr[j],arr[m]]=[arr[m],arr[j]]}roundCache[k]=arr}
   return roundCache[k][i%N];
 }
-const xAt=(seed,i)=>40+mul(seed*13+i*101)()*(W-80);
+const xAt=(seed,i)=>180+mul(seed*13+i*101)()*(W-360);
 
 /* Firebase */
 let db,uid,offset=0,state=null,players={},collected={},collUnsub=null,watchQ=-1;
@@ -477,9 +497,9 @@ let last=performance.now();
 function loop(t){
   const dt=Math.min(.05,(t-last)/1000);last=t;
   const opx=px;
-  if(dir!==0)px+=dir*420*dt;
+  if(dir!==0)px+=dir*680*dt;
   else if(tx!==null)px+=(tx-px)*Math.min(1,dt*14);
-  px=Math.max(24,Math.min(W-24,px));
+  px=Math.max(50,Math.min(W-50,px));
   if(Math.abs(px-opx)>.3){meMove.m=performance.now();meMove.d=Math.sign(px-opx)}
   if(db&&uid&&Date.now()-lastPush>100&&Math.round(px)!==lastX){
     lastPush=Date.now();lastX=Math.round(px);set(base('pos/'+uid),lastX).catch(()=>{});
@@ -489,11 +509,11 @@ function loop(t){
 function draw(){
   if(late){g.clearRect(0,0,W,H);return}
   g.clearRect(0,0,W,H);
-  g.fillStyle='rgba(233,196,106,.9)';g.beginPath();g.arc(350,150,26,0,7);g.fill();
-  g.fillStyle='rgba(255,255,255,.06)';g.fillRect(0,PY+30,W,H);
+  g.fillStyle='rgba(233,196,106,.9)';g.beginPath();g.arc(1060,155,34,0,7);g.fill();
+  g.fillStyle='rgba(255,255,255,.06)';g.fillRect(0,PY+25,W,H);
   const act=Object.entries(players).filter(([,p])=>!p.wait),n=Math.max(1,act.length);
-  const S=Math.max(.42,Math.min(1,Math.pow(6/n,.75))),L=.6+.4*S;
-  const fnt=k=>`700 ${Math.round(26*L*k)}px 'Gowun Batang',serif`;
+  const S=Math.max(.55,Math.min(1.1,Math.pow(8/n,.6))),L=.75+.25*S;
+  const fnt=k=>`700 ${Math.round(28*L*k)}px 'Gowun Batang',serif`;
   g.textAlign='center';g.textBaseline='middle';
   if(state&&state.status==='playing'&&typeof state.startedAt==='number'&&now()>=state.startedAt){
     const el=now()-state.startedAt,hi=Math.floor(el/SPAWN),lo=Math.max(0,Math.floor((el-FALL)/SPAWN));
@@ -502,11 +522,11 @@ function draw(){
       g.font=fnt(1);
       for(let i=lo;i<=hi;i++){
         if(collected[i]||pending.has(i))continue;
-        const y=(el-i*SPAWN)/FALL*(PY+40)-20;
+        const y=(el-i*SPAWN)/FALL*(PY+35)-20;
         if(y<-30||y>H+30)continue;
         const x=xAt(state.seed,i),ch=letterAt(state.seed,state.order[state.qIndex],i);
-        g.fillStyle='#cfe8da';g.beginPath();g.arc(x,y,24*L,0,7);g.fill();
-        g.strokeStyle='#e8789f';g.lineWidth=2;g.stroke();
+        g.fillStyle='#cfe8da';g.beginPath();g.arc(x,y,26*L,0,7);g.fill();
+        g.strokeStyle='#e8789f';g.lineWidth=2.5;g.stroke();
         g.fillStyle='#1d2a3f';g.fillText(ch,x,y+1);
         if(hitHead(x,y,px,S,L))claim(i,ch,x,y);
       }
@@ -515,28 +535,28 @@ function draw(){
   for(let k=fx.length-1;k>=0;k--){
     const f=fx[k],a=(performance.now()-f.t)/450;if(a>=1){fx.splice(k,1);continue}
     g.globalAlpha=1-a;g.strokeStyle=f.mine?(f.delta<0?'#ff6b6b':'#e9c46a'):'#e8789f';g.lineWidth=3;
-    g.beginPath();g.arc(f.x,f.y,24*L*(1+a*.8),0,7);g.stroke();
+    g.beginPath();g.arc(f.x,f.y,26*L*(1+a*.8),0,7);g.stroke();
     g.fillStyle='#cfe8da';g.font=fnt(1);g.fillText(f.ch,f.x,f.y+1);
     if(f.mine){
       g.fillStyle=f.delta<0?'#ff6b6b':'#e9c46a';g.font=fnt(.8);
-      g.fillText(f.delta>0?'+10':f.delta<0?'-5':'+0',f.x,f.y-28*L-a*30);
+      g.fillText(f.delta>0?'+10':f.delta<0?'-5':'+0',f.x,f.y-30*L-a*30);
     }
     g.globalAlpha=1;
   }
   act.sort((a,b)=>(a[0]===uid)-(b[0]===uid)).forEach(([k,p])=>{
     const mine=k===uid,tx0=posMap[k]??W/2,v=vis[k]||(vis[k]={x:tx0,m:0,d:1});
     if(!mine){const o=v.x;v.x+=(tx0-v.x)*.3;if(Math.abs(v.x-o)>.25){v.m=performance.now();v.d=Math.sign(v.x-o)}}
-    const dx=mine?px:v.x;g.globalAlpha=mine?1:.7;
+    const dx=mine?px:v.x;g.globalAlpha=mine?1:.72;
     if(p.look)drawChar(g,spriteCv(p.look),dx,mine?meMove:v,S);
-    if(mine||n<=8){g.font=`${mine?14:13}px 'Gowun Batang',serif`;g.fillStyle=mine?'#e9c46a':'#f3efe4';g.fillText(p.name,dx,PY+30)}
+    if(mine||n<=10){g.font=`${mine?15:13}px 'Gowun Batang',serif`;g.fillStyle=mine?'#e9c46a':'#f3efe4';g.fillText(p.name,dx,PY+34)}
     g.globalAlpha=1;
-    if(mine&&n>1){const ty=PY+17-69*S-8;g.fillStyle='#e9c46a';g.beginPath();g.moveTo(dx-6,ty-9);g.lineTo(dx+6,ty-9);g.lineTo(dx,ty);g.fill()}
+    if(mine&&n>1){const ty=PY+20-88*S-10;g.fillStyle='#e9c46a';g.beginPath();g.moveTo(dx-7,ty-10);g.lineTo(dx+7,ty-10);g.lineTo(dx,ty);g.fill()}
   });
   if(state&&state.status==='playing'&&typeof state.startedAt==='number'&&now()<state.startedAt){
     const sec=Math.max(1,Math.ceil((state.startedAt-now())/1000));
     g.fillStyle='rgba(16,22,36,.55)';g.fillRect(0,0,W,H);
-    g.textAlign='center';g.textBaseline='middle';g.fillStyle='#e9c46a';g.font="700 120px 'Gowun Batang',serif";g.fillText(sec,W/2,H/2);
-    g.font="20px 'Gowun Batang',serif";g.fillStyle='#f3efe4';g.fillText('곧 시작합니다',W/2,H/2+90);
+    g.textAlign='center';g.textBaseline='middle';g.fillStyle='#e9c46a';g.font="700 120px 'Gowun Batang',serif";g.fillText(sec,W/2,H/2-15);
+    g.font="22px 'Gowun Batang',serif";g.fillStyle='#f3efe4';g.fillText('곧 시작합니다',W/2,H/2+85);
   }
   if(players[uid])$('#myscore').textContent=`내 점수 ${players[uid].score||0}`;
 }
