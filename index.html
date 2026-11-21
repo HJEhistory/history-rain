@@ -130,6 +130,7 @@ import {getDatabase,ref,set,update,onValue,onDisconnect,onChildAdded,onChildChan
 const firebaseConfig = {
   apiKey: "AIzaSyAmdoG4-mKpnuc1GRcnUvp4GaH3f0QC8S8",
   authDomain: "rain-fd97e.firebaseapp.com",
+  databaseURL: "https://rain-fd97e-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "rain-fd97e",
   storageBucket: "rain-fd97e.firebasestorage.app",
   messagingSenderId: "905410123901",
@@ -285,7 +286,8 @@ $('#enter').onclick=async()=>{
   entered=true;
   $('#enter').disabled=true;
   try{
-    const app=initializeApp(firebaseConfig);db=getDatabase(app);
+    const app=initializeApp(firebaseConfig);
+    db=firebaseConfig.databaseURL?getDatabase(app,firebaseConfig.databaseURL):getDatabase(app);
     const cred=await signInAnonymously(getAuth(app));uid=cred.user.uid;
     onValue(ref(db,'.info/serverTimeOffset'),s=>offset=s.val()||0);
     const me=base('players/'+uid);
@@ -309,7 +311,7 @@ $('#enter').onclick=async()=>{
   }catch(e){
     entered=false;
     $('#enter').disabled=false;
-    alert('연결에 실패했습니다. 네트워크나 Firebase 설정을 확인해 주세요.');
+    alert('오류: '+(e.code||e.message||e));
   }
 };
 
@@ -424,7 +426,6 @@ async function claim(i,ch,x,y){
   try{
     const res=await runTransaction(base(`collected/${qIdx}/${i}`),v=>v===null?{c:ch,by:uid}:undefined);
     if(res.committed){
-      // 커밋 시점의 최신 collected 기준으로 필요한 글자 수 계산
       const curCounts={};
       Object.entries(collected).forEach(([k,v])=>{if(+k!==i&&v&&v.c)curCounts[v.c]=(curCounts[v.c]||0)+1});
       const need=q?[...q.a].filter(z=>z===ch).length:0;
