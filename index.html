@@ -2,102 +2,107 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>부여 글자비</title>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#1d2a3f;--bg2:#3b5668;--ink:#f3efe4;--jade:#cfe8da;--lotus:#e8789f;--gold:#e9c46a;--card:rgba(255,255,255,.09);
-  --ui-scale:1;
+  --s:1;
 }
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--ink);font-family:'Gowun Batang',serif;-webkit-user-select:none;user-select:none;touch-action:manipulation;overflow:hidden}
-body{display:flex;align-items:center;justify-content:center;padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
+html,body{
+  margin:0;width:100%;height:100%;height:100dvh;
+  background:var(--bg);color:var(--ink);font-family:'Gowun Batang',serif;
+  -webkit-user-select:none;user-select:none;touch-action:manipulation;overflow:hidden
+}
+body{
+  display:flex;align-items:center;justify-content:center;
+  padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0);
+}
 #app{
   width:1280px;height:720px;
   position:relative;
   background:linear-gradient(#1d2a3f,#3b5668 85%,#4f6e72);
   box-shadow:0 12px 40px rgba(0,0,0,.45);
-  border-radius:calc(12px * var(--ui-scale));
+  border-radius:calc(12px * var(--s));
   overflow:hidden;
-  transform-origin:center center;
-  will-change:transform;
 }
-.screen{position:absolute;inset:0;display:none;flex-direction:column;padding:calc(20px * var(--ui-scale)) calc(28px * var(--ui-scale));overflow:auto}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;padding:calc(18px * var(--s)) calc(26px * var(--s));overflow:auto}
 .screen.on{display:flex}
-h1{font-size:calc(30px * var(--ui-scale));margin:calc(4px * var(--ui-scale)) 0;letter-spacing:.04em}
-.sub{opacity:.78;margin:0 0 calc(12px * var(--ui-scale));font-size:calc(15px * var(--ui-scale))}
-.row{display:flex;gap:calc(10px * var(--ui-scale));align-items:center;margin:calc(10px * var(--ui-scale)) 0}
-.name{flex:1;padding:calc(10px * var(--ui-scale)) calc(14px * var(--ui-scale));border-radius:calc(12px * var(--ui-scale));background:var(--card);font-size:calc(19px * var(--ui-scale))}
-button.btn{font-family:inherit;font-size:calc(16px * var(--ui-scale));padding:calc(10px * var(--ui-scale)) calc(18px * var(--ui-scale));border-radius:calc(12px * var(--ui-scale));border:0;background:var(--lotus);color:#2a1020;font-weight:700;cursor:pointer}
+h1{font-size:calc(28px * var(--s));margin:calc(2px * var(--s)) 0;letter-spacing:.04em}
+.sub{opacity:.78;margin:0 0 calc(10px * var(--s));font-size:calc(14px * var(--s))}
+.row{display:flex;gap:calc(10px * var(--s));align-items:center;margin:calc(10px * var(--s)) 0}
+.name{flex:1;padding:calc(9px * var(--s)) calc(14px * var(--s));border-radius:calc(12px * var(--s));background:var(--card);font-size:calc(18px * var(--s))}
+button.btn{font-family:inherit;font-size:calc(15px * var(--s));padding:calc(9px * var(--s)) calc(16px * var(--s));border-radius:calc(12px * var(--s));border:0;background:var(--lotus);color:#2a1020;font-weight:700;cursor:pointer}
 button.btn.ghost{background:var(--card);color:var(--ink)}
 button.btn:disabled{opacity:.4}
-#cfgwarn{background:#7a2e3a;padding:calc(10px * var(--ui-scale));border-radius:calc(10px * var(--ui-scale));display:none;margin-top:calc(10px * var(--ui-scale));font-size:calc(14px * var(--ui-scale))}
+#cfgwarn{background:#7a2e3a;padding:calc(10px * var(--s));border-radius:calc(10px * var(--s));display:none;margin-top:calc(10px * var(--s));font-size:calc(13px * var(--s))}
 
 /* 관리자 로그인 화면 */
 #adminLoginBox{
-  max-width:calc(440px * var(--ui-scale));
+  max-width:calc(440px * var(--s));
   width:100%;
   margin:auto;
-  padding:calc(24px * var(--ui-scale));
-  border-radius:calc(16px * var(--ui-scale));
+  padding:calc(22px * var(--s));
+  border-radius:calc(16px * var(--s));
   background:rgba(16,22,36,.45);
   border:1px dashed var(--gold);
   display:none;
 }
 #adminLoginBox input{
   width:100%;
-  padding:calc(11px * var(--ui-scale)) calc(14px * var(--ui-scale));
-  border-radius:calc(10px * var(--ui-scale));
+  padding:calc(10px * var(--s)) calc(14px * var(--s));
+  border-radius:calc(10px * var(--s));
   border:0;
-  margin:calc(10px * var(--ui-scale)) 0;
+  margin:calc(10px * var(--s)) 0;
   font-family:inherit;
-  font-size:calc(16px * var(--ui-scale));
+  font-size:calc(15px * var(--s));
 }
 
 /* 가로형 입장 화면 */
-#joinGrid{display:grid;grid-template-columns:calc(280px * var(--ui-scale)) 1fr;gap:calc(24px * var(--ui-scale));align-items:center;margin:auto 0}
-#pvwrap{display:flex;flex-direction:column;gap:calc(10px * var(--ui-scale));align-items:center}
-#pv{width:calc(130px * var(--ui-scale));height:calc(150px * var(--ui-scale));image-rendering:pixelated;background:var(--card);border-radius:calc(14px * var(--ui-scale))}
-.prow{display:flex;gap:calc(6px * var(--ui-scale));align-items:center;margin:calc(8px * var(--ui-scale)) 0;flex-wrap:wrap}
-.prow b{width:calc(64px * var(--ui-scale));font-weight:400;opacity:.8;font-size:calc(14px * var(--ui-scale))}
-.opt{padding:calc(6px * var(--ui-scale)) calc(11px * var(--ui-scale));border-radius:calc(10px * var(--ui-scale));border:2px solid transparent;background:var(--card);color:var(--ink);font-family:inherit;font-size:calc(14px * var(--ui-scale));cursor:pointer}
+#joinGrid{display:grid;grid-template-columns:calc(260px * var(--s)) 1fr;gap:calc(22px * var(--s));align-items:center;margin:auto 0}
+#pvwrap{display:flex;flex-direction:column;gap:calc(8px * var(--s));align-items:center}
+#pv{width:calc(120px * var(--s));height:calc(138px * var(--s));image-rendering:pixelated;background:var(--card);border-radius:calc(14px * var(--s))}
+.prow{display:flex;gap:calc(6px * var(--s));align-items:center;margin:calc(6px * var(--s)) 0;flex-wrap:wrap}
+.prow b{width:calc(62px * var(--s));font-weight:400;opacity:.8;font-size:calc(13px * var(--s))}
+.opt{padding:calc(5px * var(--s)) calc(10px * var(--s));border-radius:calc(10px * var(--s));border:2px solid transparent;background:var(--card);color:var(--ink);font-family:inherit;font-size:calc(13px * var(--s));cursor:pointer}
 .opt.sel{border-color:var(--lotus)}
-.opt.sw{width:calc(30px * var(--ui-scale));height:calc(30px * var(--ui-scale));padding:0;border-radius:50%}
-#enter{margin-top:calc(10px * var(--ui-scale));align-self:flex-start;min-width:calc(160px * var(--ui-scale))}
+.opt.sw{width:calc(28px * var(--s));height:calc(28px * var(--s));padding:0;border-radius:50%}
+#enter{margin-top:calc(8px * var(--s));align-self:flex-start;min-width:calc(150px * var(--s))}
 
 /* 가로형 대기실 */
-#lobbyGrid{display:grid;grid-template-columns:1.1fr .9fr;gap:calc(24px * var(--ui-scale));flex:1;min-height:0;align-items:start}
-#lobbyList{display:flex;flex-wrap:wrap;gap:calc(8px * var(--ui-scale));margin:calc(10px * var(--ui-scale)) 0;max-height:calc(220px * var(--ui-scale));overflow:auto}
-.chip{background:var(--card);padding:calc(6px * var(--ui-scale)) calc(12px * var(--ui-scale));border-radius:999px;font-size:calc(15px * var(--ui-scale))}
-#admin{padding:calc(14px * var(--ui-scale));border:1px dashed var(--gold);border-radius:calc(12px * var(--ui-scale));display:none;background:rgba(16,22,36,.35)}
-#admin input,#admin select{width:100%;padding:calc(9px * var(--ui-scale)) calc(10px * var(--ui-scale));border-radius:calc(8px * var(--ui-scale));border:0;margin-bottom:calc(8px * var(--ui-scale));font-family:inherit;font-size:calc(14px * var(--ui-scale))}
-#admin .row{margin:calc(6px * var(--ui-scale)) 0 0}
-#lobCount{font-size:calc(20px * var(--ui-scale));margin:calc(4px * var(--ui-scale)) 0 calc(6px * var(--ui-scale));color:var(--gold)}
+#lobbyGrid{display:grid;grid-template-columns:1.1fr .9fr;gap:calc(22px * var(--s));flex:1;min-height:0;align-items:start}
+#lobbyList{display:flex;flex-wrap:wrap;gap:calc(8px * var(--s));margin:calc(8px * var(--s)) 0;max-height:calc(210px * var(--s));overflow:auto}
+.chip{background:var(--card);padding:calc(5px * var(--s)) calc(11px * var(--s));border-radius:999px;font-size:calc(14px * var(--s))}
+#admin{padding:calc(14px * var(--s));border:1px dashed var(--gold);border-radius:calc(12px * var(--s));display:none;background:rgba(16,22,36,.35)}
+#admin input,#admin select{width:100%;padding:calc(8px * var(--s)) calc(10px * var(--s));border-radius:calc(8px * var(--s));border:0;margin-bottom:calc(8px * var(--s));font-family:inherit;font-size:calc(13px * var(--s))}
+#admin .row{margin:calc(6px * var(--s)) 0 0}
+#lobCount{font-size:calc(19px * var(--s));margin:calc(4px * var(--s)) 0 calc(6px * var(--s));color:var(--gold)}
 
 /* 게임 화면 */
 #game{padding:0}
-#hud{position:absolute;top:0;left:0;right:0;padding:calc(12px * var(--ui-scale)) calc(18px * var(--ui-scale)) calc(24px * var(--ui-scale));background:linear-gradient(rgba(16,22,36,.88),rgba(16,22,36,.35) 70%,transparent);z-index:2;pointer-events:none;display:flex;align-items:center;justify-content:space-between;gap:calc(16px * var(--ui-scale))}
-#hudLeft{display:flex;flex-direction:column;gap:calc(6px * var(--ui-scale));min-width:0;flex:1}
-#hint{font-size:calc(18px * var(--ui-scale));line-height:1.35}
-#slots{display:flex;gap:calc(7px * var(--ui-scale));flex-wrap:wrap}
-.slot{min-width:calc(38px * var(--ui-scale));height:calc(40px * var(--ui-scale));border-radius:calc(8px * var(--ui-scale));border:2px solid var(--jade);display:grid;place-items:center;font-size:calc(22px * var(--ui-scale));color:#1d2a3f;background:transparent;padding:0 calc(4px * var(--ui-scale))}
+#hud{position:absolute;top:0;left:0;right:0;padding:calc(10px * var(--s)) calc(16px * var(--s)) calc(20px * var(--s));background:linear-gradient(rgba(16,22,36,.88),rgba(16,22,36,.35) 70%,transparent);z-index:2;pointer-events:none;display:flex;align-items:center;justify-content:space-between;gap:calc(14px * var(--s))}
+#hudLeft{display:flex;flex-direction:column;gap:calc(5px * var(--s));min-width:0;flex:1}
+#hint{font-size:calc(17px * var(--s));line-height:1.35}
+#slots{display:flex;gap:calc(6px * var(--s));flex-wrap:wrap}
+.slot{min-width:calc(36px * var(--s));height:calc(38px * var(--s));border-radius:calc(8px * var(--s));border:2px solid var(--jade);display:grid;place-items:center;font-size:calc(20px * var(--s));color:#1d2a3f;background:transparent;padding:0 calc(4px * var(--s))}
 .slot.f{background:var(--jade)}
-#meta{display:flex;flex-direction:column;align-items:flex-end;gap:calc(4px * var(--ui-scale));font-size:calc(14px * var(--ui-scale));opacity:.9;white-space:nowrap}
+#meta{display:flex;flex-direction:column;align-items:flex-end;gap:calc(3px * var(--s));font-size:calc(13px * var(--s));opacity:.9;white-space:nowrap}
 canvas{width:100%;height:100%;display:block;touch-action:none}
-#overlay{position:absolute;inset:0;z-index:3;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(20,28,44,.9);padding:calc(24px * var(--ui-scale))}
+#overlay{position:absolute;inset:0;z-index:3;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(20,28,44,.9);padding:calc(22px * var(--s))}
 #overlay.on{display:flex}
-#ans{font-size:calc(52px * var(--ui-scale));font-weight:700;color:var(--gold);letter-spacing:.08em;margin:calc(4px * var(--ui-scale)) 0}
-#desc{max-width:calc(560px * var(--ui-scale));line-height:1.5;font-size:calc(16px * var(--ui-scale))}
-#board{margin-top:calc(12px * var(--ui-scale));text-align:left;font-size:calc(16px * var(--ui-scale));min-width:calc(280px * var(--ui-scale))}
-#board div{display:flex;justify-content:space-between;gap:calc(24px * var(--ui-scale));padding:calc(3px * var(--ui-scale)) 0}
+#ans{font-size:calc(48px * var(--s));font-weight:700;color:var(--gold);letter-spacing:.08em;margin:calc(4px * var(--s)) 0}
+#desc{max-width:calc(560px * var(--s));line-height:1.5;font-size:calc(15px * var(--s))}
+#board{margin-top:calc(10px * var(--s));text-align:left;font-size:calc(15px * var(--s));min-width:calc(260px * var(--s))}
+#board div{display:flex;justify-content:space-between;gap:calc(22px * var(--s));padding:calc(3px * var(--s)) 0}
 .px{image-rendering:pixelated}
-#lb{position:absolute;left:calc(12px * var(--ui-scale));top:calc(102px * var(--ui-scale));z-index:2;pointer-events:none;font-size:calc(13px * var(--ui-scale));line-height:1.35;background:rgba(16,22,36,.55);border-radius:calc(10px * var(--ui-scale));padding:calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));min-width:calc(140px * var(--ui-scale));max-width:calc(210px * var(--ui-scale))}
-#lb div{display:flex;align-items:center;gap:calc(5px * var(--ui-scale));white-space:nowrap;padding:calc(1px * var(--ui-scale)) 0}
+#lb{position:absolute;left:calc(10px * var(--s));top:calc(96px * var(--s));z-index:2;pointer-events:none;font-size:calc(12px * var(--s));line-height:1.35;background:rgba(16,22,36,.55);border-radius:calc(10px * var(--s));padding:calc(6px * var(--s)) calc(9px * var(--s));min-width:calc(130px * var(--s));max-width:calc(200px * var(--s))}
+#lb div{display:flex;align-items:center;gap:calc(5px * var(--s));white-space:nowrap;padding:calc(1px * var(--s)) 0}
 #lb .me{color:var(--gold);font-weight:700}
-#lb b{margin-left:auto;padding-left:calc(8px * var(--ui-scale))}
-#lb .rk{width:calc(16px * var(--ui-scale));opacity:.7}
-#abort{position:absolute;right:calc(14px * var(--ui-scale));bottom:calc(12px * var(--ui-scale));z-index:2;font-size:calc(13px * var(--ui-scale));padding:calc(7px * var(--ui-scale)) calc(12px * var(--ui-scale));display:none}
+#lb b{margin-left:auto;padding-left:calc(8px * var(--s))}
+#lb .rk{width:calc(15px * var(--s));opacity:.7}
+#abort{position:absolute;right:calc(12px * var(--s));bottom:calc(10px * var(--s));z-index:2;font-size:calc(12px * var(--s));padding:calc(6px * var(--s)) calc(11px * var(--s));display:none}
 </style>
 </head>
 <body>
@@ -109,8 +114,8 @@ canvas{width:100%;height:100%;display:block;touch-action:none}
 
     <!-- 관리자 전용 비밀번호 관전 입장 -->
     <div id="adminLoginBox">
-      <div style="font-size:calc(20px * var(--ui-scale));font-weight:700;color:var(--gold)">관리자 관전 접속</div>
-      <p class="sub" style="margin-top:calc(6px * var(--ui-scale))">참가자 캐릭터 없이 관전 및 게임 진행을 관리합니다.</p>
+      <div style="font-size:calc(19px * var(--s));font-weight:700;color:var(--gold)">관리자 관전 접속</div>
+      <p class="sub" style="margin-top:calc(6px * var(--s))">참가자 캐릭터 없이 관전 및 게임 진행을 관리합니다.</p>
       <input id="adminEnterPass" type="password" placeholder="관리자 비밀번호 입력" autocomplete="current-password">
       <button class="btn" id="adminEnterBtn" style="width:100%">비밀번호 확인 후 관전 입장</button>
     </div>
@@ -120,7 +125,7 @@ canvas{width:100%;height:100%;display:block;touch-action:none}
       <div id="pvwrap">
         <canvas id="pv" width="20" height="23"></canvas>
         <div class="name" id="nameBox" style="width:100%;text-align:center"></div>
-        <button class="btn ghost" id="reroll" style="font-size:calc(14px * var(--ui-scale));padding:calc(8px * var(--ui-scale)) calc(14px * var(--ui-scale))">이름 다시 받기</button>
+        <button class="btn ghost" id="reroll" style="font-size:calc(13px * var(--s));padding:calc(7px * var(--s)) calc(12px * var(--s))">이름 다시 받기</button>
       </div>
       <div>
         <div id="picker"></div>
@@ -138,10 +143,10 @@ canvas{width:100%;height:100%;display:block;touch-action:none}
       <div>
         <div id="lobCount"></div>
         <div id="lobbyList"></div>
-        <p class="sub" style="margin-top:calc(10px * var(--ui-scale))">정답에 없는 글자를 머리로 받으면 -5점이에요.</p>
+        <p class="sub" style="margin-top:calc(10px * var(--s))">정답에 없는 글자를 머리로 받으면 -5점이에요.</p>
       </div>
       <div id="admin">
-        <div style="margin-bottom:calc(8px * var(--ui-scale));font-weight:700;color:var(--gold)">관리자 관전 제어</div>
+        <div style="margin-bottom:calc(8px * var(--s));font-weight:700;color:var(--gold)">관리자 관전 제어</div>
         <select id="qcount">
           <option value="10">10문제</option>
           <option value="15" selected>15문제</option>
@@ -173,7 +178,7 @@ canvas{width:100%;height:100%;display:block;touch-action:none}
       <div id="ans"></div>
       <div id="desc"></div>
       <div id="board"></div>
-      <button class="btn" id="backBtn" style="display:none;margin-top:calc(14px * var(--ui-scale))">대기실로 돌아가기</button>
+      <button class="btn" id="backBtn" style="display:none;margin-top:calc(12px * var(--s))">대기실로 돌아가기</button>
     </div>
   </section>
 </div>
@@ -196,7 +201,7 @@ const firebaseConfig = {
   appId: "1:905410123901:web:a1e2c922cca921ae8d7914"
 };
 const ADMIN_PASS="buyeo1234";
-const ADMIN_QUERY="admin"; // 예: ?admin (원하는 주소 파라미터명으로 변경 가능)
+const ADMIN_QUERY="admin";
 const ROOM="room1";
 const QUESTIONS=[
  {a:"낙화암",h:"백제 궁녀들의 전설이 전해지는 백마강변 절벽",d:"삼천궁녀가 몸을 던졌다고 전해지는 부소산 절벽입니다."},
@@ -249,18 +254,32 @@ if(isAdminPage){
   $('#joinSub').textContent='관리자 전용 관전 화면입니다. 비밀번호를 입력해 접속하세요.';
 }
 
-/* 가로/세로 비율 자동 조정 */
+/* 모바일/PC 비율 자동 조정 (실제 레이아웃 크기 기반) */
 const appEl=$('#app');
 function fitViewport(){
-  const vw=window.innerWidth||document.documentElement.clientWidth||W;
-  const vh=window.innerHeight||document.documentElement.clientHeight||H;
-  const scale=Math.min(vw/W,vh/H);
-  appEl.style.transform=`scale(${scale})`;
-  document.documentElement.style.setProperty('--ui-scale',String(scale));
+  const vw=(window.visualViewport?window.visualViewport.width:window.innerWidth)||document.documentElement.clientWidth||W;
+  const vh=(window.visualViewport?window.visualViewport.height:window.innerHeight)||document.documentElement.clientHeight||H;
+  const ratio=W/H;
+  let boxW,boxH;
+  if(vw/vh>=ratio){
+    boxH=vh;
+    boxW=vh*ratio;
+  }else{
+    boxW=vw;
+    boxH=vw/ratio;
+  }
+  const scale=boxW/W;
+  appEl.style.width=`${Math.round(boxW)}px`;
+  appEl.style.height=`${Math.round(boxH)}px`;
+  document.documentElement.style.setProperty('--s',String(scale));
 }
 fitViewport();
 addEventListener('resize',fitViewport);
-if(window.visualViewport)window.visualViewport.addEventListener('resize',fitViewport);
+addEventListener('orientationchange',()=>setTimeout(fitViewport,120));
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',fitViewport);
+  window.visualViewport.addEventListener('scroll',fitViewport);
+}
 
 /* 캐릭터 / 이름 */
 const SW=20,SH=23,OL='#4a3646';
