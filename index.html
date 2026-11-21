@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>부여 글자비</title>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1d2a3f;--bg2:#3b5668;--ink:#f3efe4;--jade:#cfe8da;--lotus:#e8789f;--gold:#e9c46a;--card:rgba(255,255,255,.09)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:'Gowun Batang',serif;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+body{display:flex;justify-content:center;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+#app{width:100%;max-width:440px;height:100%;position:relative;background:linear-gradient(#1d2a3f,#3b5668 85%,#4f6e72)}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;padding:20px;overflow:auto}
+.screen.on{display:flex}
+h1{font-size:34px;margin:12px 0 4px;letter-spacing:.04em}
+.sub{opacity:.75;margin:0 0 18px}
+.chars{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.chars button{font-size:36px;padding:12px 0;border-radius:14px;border:2px solid transparent;background:var(--card);cursor:pointer}
+.chars button.sel{border-color:var(--lotus);background:rgba(232,120,159,.2)}
+.row{display:flex;gap:10px;align-items:center;margin:16px 0}
+.name{flex:1;padding:12px 14px;border-radius:12px;background:var(--card);font-size:20px}
+button.btn{font-family:inherit;font-size:18px;padding:12px 18px;border-radius:12px;border:0;background:var(--lotus);color:#2a1020;font-weight:700;cursor:pointer}
+button.btn.ghost{background:var(--card);color:var(--ink)}
+button.btn:disabled{opacity:.4}
+#cfgwarn{background:#7a2e3a;padding:10px;border-radius:10px;display:none;margin-top:10px;font-size:14px}
+#lobbyList{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.chip{background:var(--card);padding:6px 10px;border-radius:999px;font-size:15px}
+#admin{margin-top:auto;padding:12px;border:1px dashed var(--gold);border-radius:12px;display:none}
+#admin input{width:100%;padding:10px;border-radius:8px;border:0;margin-bottom:8px;font-family:inherit}
+#admin .row{margin:6px 0}
+#game{padding:0}
+#hud{position:absolute;top:0;left:0;right:0;padding:10px 12px;background:linear-gradient(rgba(16,22,36,.85),transparent);z-index:2;pointer-events:none}
+#hint{font-size:17px;line-height:1.35}
+#slots{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.slot{min-width:34px;height:38px;border-radius:8px;border:2px solid var(--jade);display:grid;place-items:center;font-size:22px;color:#1d2a3f;background:transparent}
+.slot.f{background:var(--jade)}
+#meta{display:flex;justify-content:space-between;font-size:13px;opacity:.8;margin-top:6px}
+canvas{width:100%;height:100%;display:block}
+#overlay{position:absolute;inset:0;z-index:3;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(20,28,44,.88);padding:24px}
+#overlay.on{display:flex}
+#ans{font-size:56px;font-weight:700;color:var(--gold);letter-spacing:.08em;margin:6px 0}
+#desc{max-width:320px;line-height:1.5}
+#board{margin-top:16px;text-align:left;font-size:17px;min-width:220px}
+#board div{display:flex;justify-content:space-between;gap:20px;padding:3px 0}
+.px{image-rendering:pixelated}
+#pvwrap{display:flex;gap:14px;align-items:center;margin-bottom:8px}
+#pv{width:120px;height:138px;image-rendering:pixelated;background:var(--card);border-radius:14px}
+.prow{display:flex;gap:6px;align-items:center;margin:6px 0;flex-wrap:wrap}
+.prow b{width:54px;font-weight:400;opacity:.75;font-size:14px}
+.opt{padding:6px 10px;border-radius:10px;border:2px solid transparent;background:var(--card);color:var(--ink);font-family:inherit;font-size:14px;cursor:pointer}
+.opt.sel{border-color:var(--lotus)}
+.opt.sw{width:30px;height:30px;padding:0;border-radius:50%}
+#start,#enter{margin-top:14px}
+canvas{touch-action:none}
+#lb{position:absolute;left:6px;top:calc(140px + env(safe-area-inset-top,0px));z-index:2;pointer-events:none;font-size:12px;line-height:1.3;background:rgba(16,22,36,.5);border-radius:10px;padding:5px 7px;min-width:104px;max-width:150px}
+#lb div{display:flex;align-items:center;gap:4px;white-space:nowrap;padding:1px 0}
+#lb .me{color:var(--gold);font-weight:700}
+#lb b{margin-left:auto;padding-left:6px}
+#lb .rk{width:14px;opacity:.7}
+#admin select,#qwrap select{width:100%;padding:10px;border-radius:8px;border:0;margin-bottom:8px;font-family:inherit}
+#lobCount{font-size:22px;margin:4px 0 8px}
+#abort{position:absolute;right:8px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:2;font-size:13px;padding:6px 10px;display:none}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- 입장 화면 -->
+  <section class="screen on" id="join">
+    <h1>부여 글자비</h1>
+    <p class="sub">하늘에서 내려오는 글자를 캐릭터 머리로 받아 부여의 명소를 맞혀 보세요.</p>
+    <div id="pvwrap"><canvas id="pv" width="20" height="23"></canvas><div style="flex:1"><div class="name" id="nameBox"></div><button class="btn ghost" id="reroll" style="margin-top:8px;font-size:15px">이름 다시 받기</button></div></div>
+    <div id="picker"></div>
+    <button class="btn" id="enter">입장하기</button>
+    <div id="cfgwarn">firebaseConfig 값을 먼저 채워 주세요.</div>
+  </section>
+  <!-- 대기실 -->
+  <section class="screen" id="lobby">
+    <h1>대기실</h1>
+    <p class="sub" id="lobMsg"></p>
+    <div id="lobCount"></div>
+    <div id="lobbyList"></div>
+    <p class="sub">정답에 없는 글자를 머리로 받으면 -5점이에요.</p>
+    <div id="admin">
+      <div style="margin-bottom:8px">관리자 모드</div>
+      <input id="pass" type="password" placeholder="관리자 비밀번호">
+      <select id="qcount"><option value="10">10문제</option><option value="15" selected>15문제</option><option value="20">20문제</option><option value="99">전체</option></select>
+      <div class="row"><button class="btn" id="startBtn">게임 시작</button><button class="btn ghost" id="resetBtn">대기실로 초기화</button></div>
+    </div>
+  </section>
+  <!-- 게임 -->
+  <section class="screen" id="game">
+    <div id="hud"><div id="hint"></div><div id="slots"></div><div id="meta"><span id="qno"></span><span id="myscore"></span></div></div>
+    <canvas id="cv" width="440" height="760"></canvas>
+    <div id="lb"></div>
+    <button class="btn ghost" id="abort">대기실로</button>
+    <div id="overlay"><div id="ovTitle" class="sub"></div><div id="ans"></div><div id="desc"></div><div id="board"></div><button class="btn" id="backBtn" style="display:none;margin-top:16px">대기실로 돌아가기</button></div>
+  </section>
+</div>
+
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {getAuth,signInAnonymously} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {getDatabase,ref,set,update,onValue,onDisconnect,onChildAdded,onChildChanged,onChildRemoved,runTransaction,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+
+/* ===== 설정 =====
+   권장 보안 규칙(글자 중복 획득 방지): collected/$q/$i 는 이미 값이 있으면 쓰기 금지
+   "collected":{"$q":{"$i":{".write":"auth!=null && !data.exists()"}}} */
+const firebaseConfig = {
+  apiKey: "AIzaSyAmdoG4-mKpnuc1GRcnUvp4GaH3f0QC8S8",
+  authDomain: "rain-fd97e.firebaseapp.com",
+  projectId: "rain-fd97e",
+  storageBucket: "rain-fd97e.firebasestorage.app",
+  messagingSenderId: "905410123901",
+  appId: "1:905410123901:web:a1e2c922cca921ae8d7914"
+};
+const ADMIN_PASS="buyeo1234";           // 관리자 비밀번호 (주소 끝에 ?admin=1 을 붙여야 입력창이 보임)
+const ROOM="room1";                      // 방 이름. 바꾸면 별도 게임 공간
+const QUESTIONS=[
+ {a:"낙화암",h:"백제 궁녀들의 전설이 전해지는 백마강변 절벽",d:"삼천궁녀가 몸을 던졌다고 전해지는 부소산 절벽입니다."},
+ {a:"궁남지",h:"서동과 선화공주 이야기가 깃든 연꽃 연못",d:"백제 무왕 때 만든 우리나라 최초의 궁궐 연못입니다."},
+ {a:"부소산성",h:"백제 사비 도읍기 왕궁 뒤편의 산성",d:"사비성의 중심이었던 산성으로 낙화암과 고란사가 함께 있습니다."},
+ {a:"정림사지",h:"고요한 오층석탑이 서 있는 옛 절터",d:"백제 석탑의 아름다움을 보여 주는 국보 오층석탑이 있습니다."},
+ {a:"고란사",h:"고란초 약수로 알려진 부소산 기슭의 절",d:"낙화암 아래 백마강을 내려다보는 절입니다."},
+ {a:"백마강",h:"부여를 감싸 흐르는 금강 하류의 이름",d:"황포돛배가 오가는 부여의 대표 풍경입니다."},
+ {a:"백제문화단지",h:"사비 시대 궁궐과 마을을 재현한 곳",d:"백제의 생활과 건축을 한눈에 볼 수 있는 역사 테마파크입니다."},
+ {a:"금동대향로",h:"봉황과 용이 장식된 백제의 대표 국보, 능산리 절터에서 발견",d:"1993년 능산리 절터 연못터에서 발견된 국보로, 백제 공예의 정수로 꼽힙니다."},
+ {a:"능산리고분군",h:"사비 시기 백제 왕과 왕족이 묻힌 무덤 떼",d:"부여 나성 바깥에 있으며 세계유산 백제역사유적지구에 포함됩니다."},
+ {a:"부여나성",h:"사비 도읍을 바깥에서 둘러싸 지키던 긴 방어선",d:"백제 사비 도성의 외곽을 두른 나성으로 세계유산에 포함됩니다."},
+ {a:"관북리유적",h:"사비 시기 왕궁터로 추정되는 발굴지",d:"백제 왕궁의 관청과 도로 흔적이 발견된 곳으로 세계유산에 포함됩니다."},
+ {a:"무량사",h:"김시습이 말년을 보낸 만수산 기슭의 절",d:"극락전과 오층석탑이 있으며 김시습의 부도가 전해지는 절입니다."},
+ {a:"신동엽문학관",h:"「껍데기는 가라」를 쓴 부여 출신 시인을 기리는 곳",d:"신동엽 시인의 생가 옆에 있는 문학관입니다."},
+ {a:"수북정",h:"백마강 절벽 위에 세운 조선 시대 누각",d:"백마강 물줄기를 내려다보는 조선 시대 정자입니다."},
+ {a:"구드래",h:"백마강변 나루터와 조각공원이 있는 곳",d:"황포돛배 선착장과 조각공원이 있는 백마강변 명소입니다."},
+ {a:"서동요",h:"선화공주를 얻으려 소년이 아이들에게 부르게 했다는 향가",d:"삼국유사에 전하는 노래로 서동과 선화공주 설화의 바탕이 됩니다."},
+ {a:"선화공주",h:"서동이 아내로 맞았다고 전하는 신라 진평왕의 딸",d:"서동요 설화에 나오는 신라 진평왕의 셋째 딸입니다."},
+ {a:"계백장군",h:"황산벌에서 5천 결사대를 이끌고 싸운 백제 장수",d:"660년 황산벌 전투에서 신라군에 맞섰고, 삼충사에 모셔져 있습니다."},
+ {a:"의자왕",h:"백제의 마지막 임금",d:"660년 사비성이 함락되며 백제의 마지막 왕이 되었습니다."},
+ {a:"사비성",h:"538년 웅진에서 옮겨 온 백제의 마지막 도읍, 지금의 부여",d:"성왕이 도읍을 옮기며 나라 이름을 남부여로 바꾸기도 했습니다."},
+ {a:"오층석탑",h:"정림사지 한가운데 우뚝 선 국보 제9호",d:"백제 석탑의 전형으로 평제탑이라 불리기도 했습니다."},
+ {a:"굿뜨래",h:"부여 농특산물에 붙는 공동 브랜드 이름",d:"부여의 수박, 밤, 쌀 등 농특산물을 함께 알리는 브랜드입니다."},
+ {a:"서동연꽃축제",h:"궁남지에서 매년 한여름에 열리는 부여의 대표 행사",d:"연꽃이 활짝 피는 궁남지에서 열리는 여름 축제입니다."},
+ {a:"황포돛배",h:"백마강을 오가며 관광객을 태우는 누런 천 달린 유람선",d:"구드래 나루터에서 출발해 낙화암 아래를 지나는 유람선입니다."},
+ {a:"사택지적비",h:"백제 대좌평이 늙음을 한탄하며 남긴 석조 기록물",d:"1948년 부여에서 발견된 비석으로 백제 귀족의 불교 신앙이 담겨 있습니다."},
+ {a:"평제탑",h:"정림사지 오층석탑이 한때 불리던 이름, 소정방의 승전 기록에서 유래",d:"당나라 소정방이 백제를 평정했다는 글을 새긴 데서 유래한 이름입니다."},
+ {a:"성흥산성",h:"임천면 높은 곳에 자리한 백제의 옛 방어 시설, 사랑나무로 유명",d:"정상의 느티나무는 사랑나무로 불리며 연인들의 명소가 되었습니다."},
+ {a:"대조사",h:"임천 성흥산 자락에 있는 절, 큰 미륵상이 서 있어요",d:"높이 약 10m의 석조미륵보살입상으로 유명합니다."},
+ {a:"삼충사",h:"성충, 흥수, 계백 세 신하를 모신 부소산 안 건물",d:"백제 말기에 나라를 위해 충성한 세 신하를 모신 사당입니다."},
+ {a:"백화정",h:"궁녀들의 넋을 기리며 절벽 꼭대기에 세운 건물",d:"낙화암 위에 서서 백마강을 내려다보는 정자입니다."},
+ {a:"고란초",h:"부소산 기슭 절 뒤편 바위틈에서 자라는 양치식물",d:"고란사 약수터 주변에 자라며 절 이름의 유래가 되었다고 합니다."},
+ {a:"백제대교",h:"부여읍과 규암면을 이어 금강을 건너는 큰 다리",d:"부여읍과 규암면을 잇는 백마강의 다리입니다."},
+ {a:"왕흥사지",h:"577년 기록이 새겨진 보물이 나온 백마강 건너편 옛 절터",d:"사리기에 새겨진 글로 창건 시기가 밝혀진 절터입니다."},
+ {a:"연꽃",h:"한여름 궁남지를 분홍빛으로 물들이는 물가의 주인공",d:"궁남지에서는 해마다 여름이면 연꽃이 활짝 핍니다."}
+];
+const PLACES=["부소산성","낙화암","고란사","궁남지","정림사지","백마강","수북정","구드래","신동엽","능산리","무량사","서동","선화","사비","금성산","규암","대재각","외산","성흥산","홍산"];
+const CHARS=["🐻","🐰","🦊","🐯","🐼","🐸","🐧","🦉"];
+const W=440,H=760,PY=H-70,FALL=5200,SPAWN=650,EXTRA=4,ANS_MS=5000;
+
+const $=s=>document.querySelector(s);
+const show=id=>{document.querySelectorAll('.screen').forEach(e=>e.classList.toggle('on',e.id===id))};
+const isAdmin=new URLSearchParams(location.search).has('admin');
+if(!firebaseConfig.apiKey){$('#cfgwarn').style.display='block'}
+
+/* 캐릭터 / 이름 */
+const SW=20,SH=23,OL='#4a3646';
+const PAL=[["#f6e3c5","#e2c39a","#fff8ea"],["#f9bfd0","#e690ab","#ffe6ee"],["#aad7f5","#7fb3de","#e4f4ff"],["#b9e9ca","#8cc9a2","#e8fbef"],["#fbe58f","#e8c457","#fff7cd"]];
+const PD=["#3d3340","#4f2f40","#2f4058","#2f4a40","#4a4430"];
+const SPECIES=["고양이","토끼","곰","강아지","판다","병아리"],ACC=["없음","리본","왕관","안경","스카프"];
+const _sc={};
+function spriteCv(l){
+  const cv=document.createElement('canvas');cv.width=SW;cv.height=SH;
+  if(l.sp==null)return cv;
+  const key=[l.sp,l.c,l.a].join();if(_sc[key])return _sc[key];
+  const x=cv.getContext('2d'),G=Array.from({length:SH},()=>Array(SW).fill(null));
+  const set=(a,b,c)=>{if(a>=0&&a<SW&&b>=0&&b<SH)G[b][a]=c};
+  const E=(cx,cy,rx,ry)=>{const o=[];for(let y=0;y<SH;y++)for(let a=0;a<SW;a++)if(((a-cx)/rx)**2+((y-cy)/ry)**2<=1)o.push([a,y]);return o};
+  const M=p=>p.map(([a,b])=>[19-a,b]);
+  const dot=(p,c)=>p.forEach(([a,b])=>set(a,b,c));
+  const layer=(p,col)=>{const k=new Set(p.map(q=>q+''));
+    p.forEach(([a,b])=>set(a,b,typeof col==='function'?col(a,b):col));
+    p.forEach(([a,b])=>[[1,0],[-1,0],[0,1],[0,-1]].forEach(([dx,dy])=>{if(!k.has((a+dx)+','+(b+dy)))set(a+dx,b+dy,OL)}))};
+  const s=l.sp,P=PAL[l.c];let B=P[0],S=P[1],L=P[2];
+  if(s===4){B='#ffffff';S='#e0e2ec';L='#ffffff'}
+  const D=PD[l.c];
+  // 뒤쪽 파츠: 꼬리, 귀
+  if(s===0)layer([[15,19],[16,19],[16,18],[17,18],[17,17],[17,16],[18,15]],B);
+  if(s===3)layer(E(16.5,18,1.6,2),B);
+  if(s===0){const e=[[4,2],[4,3],[5,3],[4,4],[5,4],[6,4],[5,5],[6,5],[7,5],[8,5]];layer(e,B);layer(M(e),B)}
+  if(s===1){layer(E(6.5,5,2,3.2),B);layer(E(12.5,5,2,3.2),B)}
+  if(s===2||s===4){const c=s===4?D:B;layer(E(4.8,4.3,2.5,2.5),c);layer(E(14.2,4.3,2.5,2.5),c)}
+  if(s===3){layer(E(3.2,5.7,2.2,3.9),S);layer(E(15.8,5.7,2.2,3.9),S)}
+  if(s===5)layer([[9,2],[8,3],[9,3],[9,4],[10,2],[10,3],[10,4],[11,3]],B);
+  // 몸통, 배, 팔, 발
+  layer(E(9.5,18.6,4.6,2.8),B);
+  dot(E(9.5,19.2,2.4,1.6),L);
+  layer(E(5.4,18.6,1.3,1.7),B);layer(E(13.6,18.6,1.3,1.7),B);
+  layer(E(7,20.5,2.2,1.1),s===4?D:S);layer(E(12,20.5,2.2,1.1),s===4?D:S);
+  // 머리
+  layer(E(9.5,11,8,6.5),(a,b)=>((a-9.5)*.45+(b-11))>4.2?S:B);
+  dot([[5,7],[6,6],[7,6],[8,6]],L);
+  // 종별 디테일
+  if(s===0){dot([[9,5],[10,5],[9,6],[10,6],[7,6],[12,6]],S);dot([[5,4],[5,5]],'#ffb3c6');dot(M([[5,4],[5,5]]),'#ffb3c6')}
+  if(s===1){dot(E(6.5,5,1,2.2),'#ffb3c6');dot(E(12.5,5,1,2.2),'#ffb3c6')}
+  if(s===2){dot(E(4.8,4.3,1.2,1.2),L);dot(E(14.2,4.3,1.2,1.2),L);dot(E(9.5,14.2,3.4,2.4),L)}
+  if(s===3)dot(E(9.5,14.3,3.6,2.5),L);
+  if(s===4){dot(E(6.5,11,2.4,3),D);dot(E(12.5,11,2.4,3),D)}
+  // 얼굴
+  const eye='#1e1424',ey=[[6,10],[7,10],[6,11],[7,11],[6,12],[7,12]];
+  dot(ey,eye);dot(M(ey),eye);dot([[6,10],[7,12],[12,10],[13,12]],'#fff');
+  dot([[3,14],[4,14],[5,14]],'#ff8fa8');dot(M([[3,14],[4,14],[5,14]]),'#ff8fa8');
+  if(s===5){dot([[8,13],[9,13],[10,13],[11,13]],'#ff9e3d');dot([[9,14],[10,14]],'#e07b22')}
+  else{dot([[9,13],[10,13]],(s===2||s===3)?'#3a2a35':'#e0708c');dot([[8,14],[11,14],[9,15],[10,15]],'#7a4a5a')}
+  if(s===3)dot([[10,16]],'#ff8fa8');
+  // 꾸미기
+  const a=l.a;
+  if(a===1){layer([[7,18],[8,18],[7,19],[8,19],[11,18],[12,18],[11,19],[12,19]],'#ff5c8a');dot([[9,18],[10,18],[9,19],[10,19]],'#c93a68')}
+  if(a===2){layer([[7,3],[9,3],[10,3],[12,3],[7,4],[8,4],[9,4],[10,4],[11,4],[12,4],[7,5],[8,5],[9,5],[10,5],[11,5],[12,5]],'#ffd45a');dot([[9,5],[10,5]],'#e8456b')}
+  if(a===3){const g='#3a2a35',ring=x0=>{for(let i=1;i<3;i++){set(x0+i,9,g);set(x0+i,13,g)}for(let j=1;j<4;j++){set(x0,9+j,g);set(x0+3,9+j,g)}};ring(5);ring(11);dot([[9,11],[10,11]],g)}
+  if(a===4){const p=[];for(let a2=6;a2<=13;a2++)for(let b=17;b<=18;b++)p.push([a2,b]);p.push([12,19],[12,20]);layer(p,(a2)=>a2%4<2?'#ff7a9a':'#ffd1dc')}
+  G.forEach((row,y)=>row.forEach((c,xx)=>{if(c){x.fillStyle=c;x.fillRect(xx,y,1,1)}}));
+  return _sc[key]=cv;
+}
+const spriteURL=l=>spriteCv(l).toDataURL();
+const face=l=>l?`<img class="px" src="${spriteURL(l)}" width="22" height="26" style="vertical-align:middle">`:'';
+const hitHead=(x,y,cx,S,L)=>(((x-cx)/(24*S+14*L))**2+((y-(PY+17-34.5*S))/(19.5*S+14*L))**2)<=1;
+const meMove={m:0,d:1},vis={};
+function drawChar(g,cv,x,st,S=1){
+  const t=performance.now(),mv=t-st.m<140;let hop=0,rot=0,sx=1,sy=1;
+  if(mv){const p=Math.abs(Math.sin(t/85));hop=p*9;rot=Math.sin(t/85)*.12+st.d*.06;sy=1-.08*(1-p);sx=1+.06*(1-p)}
+  else{const b=Math.sin(t/420);sy=1+b*.035;sx=1-b*.02}
+  g.save();g.imageSmoothingEnabled=false;g.translate(x,PY+17-hop*S);g.rotate(rot);g.scale(st.d*sx*S,sy*S);g.drawImage(cv,-30,-69,60,69);g.restore();
+}
+const rnd=n=>Math.floor(Math.random()*n);
+let look={sp:rnd(6),c:rnd(5),a:rnd(5)},myName="";
+const newName=()=>{myName=PLACES[rnd(PLACES.length)]+" "+(10+rnd(90));$('#nameBox').textContent=myName};
+newName();$('#reroll').onclick=newName;
+const DEFS=[["캐릭터",SPECIES,'sp'],["털색",PAL.map(x=>x[0]),'c'],["꾸미기",ACC,'a']];
+DEFS.forEach(([lab,opts,key])=>{
+  const row=document.createElement('div');row.className='prow';row.innerHTML=`<b>${lab}</b>`;
+  opts.forEach((o,i)=>{const b=document.createElement('button');const sw=o[0]==='#';b.className='opt'+(sw?' sw':'');
+    if(sw)b.style.background=o;else b.textContent=o;
+    b.dataset.k=key;b.dataset.i=i;b.onclick=()=>{look[key]=i;refreshLook()};row.appendChild(b)});
+  $('#picker').appendChild(row)});
+function refreshLook(){
+  const x=$('#pv').getContext('2d');x.clearRect(0,0,SW,SH);x.drawImage(spriteCv(look),0,0);
+  document.querySelectorAll('#picker .opt').forEach(b=>b.classList.toggle('sel',look[b.dataset.k]==b.dataset.i));
+}
+refreshLook();
+
+/* 결정적 난수 (모든 접속자에게 같은 글자가 같은 위치에 내려오게 함) */
+const mul=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const allSyl=[...new Set(QUESTIONS.flatMap(q=>[...q.a]))];
+const roundCache={};
+function letterAt(seed,qi,i){
+  const ans=[...QUESTIONS[qi].a],N=ans.length+EXTRA,r=Math.floor(i/N),k=seed+"_"+qi+"_"+r;
+  if(!roundCache[k]){const rnd=mul(seed*31+r*7919+qi);const pool=allSyl.filter(c=>!ans.includes(c));
+    const arr=[...ans];for(let j=0;j<EXTRA;j++)arr.push(pool[Math.floor(rnd()*pool.length)]);
+    for(let j=arr.length-1;j>0;j--){const m=Math.floor(rnd()*(j+1));[arr[j],arr[m]]=[arr[m],arr[j]]}roundCache[k]=arr}
+  return roundCache[k][i%N];
+}
+const xAt=(seed,i)=>40+mul(seed*13+i*101)()*(W-80);
+
+/* Firebase */
+let db,uid,offset=0,state=null,players={},collected={},collRef=null,collUnsub=null,watchQ=-1;
+const posMap={},fx=[];let lastX=-1,late=false,gotFirst=false;
+const base=p=>ref(db,`${ROOM}/${p}`);
+const now=()=>Date.now()+offset;
+
+$('#enter').onclick=async()=>{
+  if(!firebaseConfig.apiKey)return;
+  const app=initializeApp(firebaseConfig);db=getDatabase(app);
+  const cred=await signInAnonymously(getAuth(app));uid=cred.user.uid;
+  onValue(ref(db,'.info/serverTimeOffset'),s=>offset=s.val()||0);
+  const me=base('players/'+uid);
+  await set(me,{name:myName,look:look,score:0});
+  onDisconnect(me).remove();
+  const mp=base('pos/'+uid);await set(mp,Math.round(W/2));onDisconnect(mp).remove();
+  onChildAdded(base('pos'),s=>{posMap[s.key]=s.val()});
+  onChildChanged(base('pos'),s=>{posMap[s.key]=s.val()});
+  onChildRemoved(base('pos'),s=>{delete posMap[s.key];delete vis[s.key]});
+  onValue(base('players'),s=>{players=s.val()||{};renderLobby();renderLB()});
+  onValue(base('state'),s=>{state=s.val();
+    const fresh=state&&state.status==='playing'&&state.qIndex===0&&state.startedAt>now();   // 카운트다운 중이면 참가 가능
+    if(!gotFirst){gotFirst=true;late=!!state&&state.status!=='lobby'&&!fresh;if(late)update(me,{wait:true})}
+    else if(late&&(!state||state.status==='lobby'||fresh)){late=false;update(me,{wait:null})}
+    onState()});
+  if(isAdmin)$('#admin').style.display='block';
+  show('lobby');requestAnimationFrame(loop);
+};
+
+const mini=l=>l?`<img class="px" src="${spriteURL(l)}" width="14" height="16">`:'';
+const lbRow=(p,i)=>`<div class="${p.k===uid?'me':''}"><span class="rk">${i+1}</span>${mini(p.look)}<span>${p.name}</span><b>${p.score||0}</b></div>`;
+function renderLB(){   // 실시간 점수 목록: 상위 10명 + 내가 밖이면 내 순위
+  const arr=Object.entries(players).filter(([,p])=>!p.wait).map(([k,p])=>({k,...p})).sort((a,b)=>(b.score||0)-(a.score||0));
+  const mi=arr.findIndex(p=>p.k===uid);
+  $('#lb').innerHTML=arr.slice(0,10).map(lbRow).join('')+(mi>=10?'<div style="opacity:.6">⋮</div>'+lbRow(arr[mi],mi):'');
+}
+function renderLobby(){
+  const list=Object.values(players);
+  $('#lobbyList').innerHTML=list.map(p=>`<span class="chip">${face(p.look)} ${p.name}</span>`).join('');
+  $('#lobCount').textContent=`접속 ${list.length}명`;
+  $('#lobMsg').textContent=late?'게임이 진행 중이에요. 이번 판이 끝나면 다음 판부터 참여할 수 있어요.':isAdmin?'참가자가 모이면 게임 시작을 눌러 주세요. 3초 카운트다운 뒤 시작해요.':'관리자가 시작하면 3초 카운트다운 뒤 게임이 열려요.';
+}
+function adminOK(){if($('#pass').value!==ADMIN_PASS){alert('비밀번호가 맞지 않습니다.');return false}return true}
+$('#startBtn').onclick=async()=>{
+  if(!adminOK())return;
+  if(state&&state.status==='playing'&&!confirm('진행 중인 게임을 중단하고 새로 시작할까요?'))return;
+  const u={};Object.keys(players).forEach(k=>u['players/'+k+'/score']=0);
+  const cnt=Math.min(QUESTIONS.length,+$('#qcount').value||15),order=QUESTIONS.map((_,i)=>i).sort(()=>Math.random()-.5).slice(0,cnt);
+  u.collected=null;u.state={status:'playing',qIndex:0,order,seed:1+Math.floor(Math.random()*1e6),startedAt:now()+3500};   // 3초 카운트다운 뒤 시작
+  await update(base(''),u);
+};
+const toLobby=()=>update(base(''),{state:null,collected:null});
+const askAdmin=()=>prompt('관리자 비밀번호')===ADMIN_PASS;
+$('#resetBtn').onclick=async()=>{if(adminOK())await toLobby()};
+$('#abort').onclick=async()=>{if(confirm('게임을 중단하고 대기실로 돌아갈까요?')&&askAdmin())await toLobby()};
+$('#backBtn').onclick=async()=>{if(askAdmin())await toLobby()};
+
+function onState(){
+  if(!state||state.status==='lobby'||late){show('lobby');$('#overlay').classList.remove('on');if(!state||state.status==='lobby')watchQ=-1;renderLobby();return}
+  show('game');
+  $('#abort').style.display=isAdmin?'block':'none';
+  if(watchQ!==state.qIndex){
+    watchQ=state.qIndex;collected={};pending.clear();
+    if(collUnsub)collUnsub();
+    collUnsub=onValue(base('collected/'+state.qIndex),s=>{const nv=s.val()||{};
+      if(state&&state.startedAt){const el=now()-state.startedAt;for(const i in nv)if(!collected[i]&&!pending.has(+i)){const y=(el-i*SPAWN)/FALL*(PY+40)-20;if(y>-30&&y<H)fx.push({x:xAt(state.seed,+i),y,t:performance.now(),ch:nv[i].c})}}
+      collected=nv;checkDone()});
+    const q=Q(state.qIndex);
+    if(q){$('#hint').textContent=q.h;$('#qno').textContent=`문제 ${state.qIndex+1} / ${state.order.length}`}
+  }
+  const ov=$('#overlay');
+  if(state.status==='answer'||state.status==='finished'){
+    const fin=state.status==='finished',q=fin?null:Q(state.qIndex);
+    $('#ovTitle').textContent=fin?'모든 문제 완료!':'정답!';$('#backBtn').style.display=(fin&&isAdmin)?'block':'none';
+    $('#ans').textContent=fin?'🏆':q.a;$('#desc').textContent=fin?'최종 순위':q.d;
+    const rank=Object.values(players).filter(p=>!p.wait).sort((a,b)=>(b.score||0)-(a.score||0)).slice(0,fin?8:3);
+    $('#board').innerHTML=rank.map((p,i)=>`<div><span>${i+1}. ${face(p.look)} ${p.name}</span><b>${p.score}</b></div>`).join('');
+    ov.classList.add('on');
+  }else ov.classList.remove('on');
+}
+
+/* 획득 / 정답 판정 */
+const pending=new Set(),Q=i=>QUESTIONS[state.order[i]];
+function counts(){const c={};Object.values(collected).forEach(v=>c[v.c]=(c[v.c]||0)+1);return c}
+function checkDone(){
+  if(!state||state.status!=='playing')return;
+  const need={};[...Q(state.qIndex).a].forEach(ch=>need[ch]=(need[ch]||0)+1);
+  const c=counts(),got=[];
+  Object.keys(need).forEach(ch=>{for(let j=0;j<Math.min(need[ch],c[ch]||0);j++)got.push(ch)});
+  const ans=[...Q(state.qIndex).a],tmp={...c};
+  $('#slots').innerHTML=ans.map(ch=>{const ok=tmp[ch]>0;if(ok)tmp[ch]--;return `<div class="slot ${ok?'f':''}">${ok?ch:''}</div>`}).join('');
+  if(got.length===ans.length){
+    const cur=state.qIndex;
+    runTransaction(base('state'),s=>(s&&s.status==='playing'&&s.qIndex===cur)?{...s,status:'answer',answerAt:serverTimestamp()}:s);
+  }
+}
+async function claim(i,ch,x,y){
+  const q=state.qIndex;pending.add(i);   // 닿는 순간 내 화면에서 먼저 사라짐
+  const res=await runTransaction(base(`collected/${q}/${i}`),v=>v===null?{c:ch,by:uid}:undefined);  // 서버에서 먼저 쓴 1명만 성공
+  if(res.committed){
+    const need=[...Q(q).a].filter(z=>z===ch).length,c=counts()[ch]||0,delta=need===0?-5:(c<=need?10:0);   // 정답에 없는 글자는 -5
+    if(delta>0)runTransaction(base(`players/${uid}/score`),s=>(s||0)+10);
+    else if(delta<0)runTransaction(base(`players/${uid}/score`),s=>Math.max(0,(s||0)-5));
+    fx.push({x,y,t:performance.now(),ch,mine:true,delta});
+  }else fx.push({x,y,t:performance.now(),ch});
+}
+let advTry=0;
+function advance(){
+  if(!state||state.status!=='answer'||now()<state.answerAt+ANS_MS||Date.now()-advTry<1000)return;
+  advTry=Date.now();const cur=state.qIndex;
+  runTransaction(base('state'),s=>{
+    if(!s||s.status!=='answer'||s.qIndex!==cur)return s;
+    if(cur+1>=s.order.length)return {...s,status:'finished'};
+    return {status:'playing',qIndex:cur+1,order:s.order,seed:1+Math.floor(Math.random()*1e6),startedAt:serverTimestamp()};
+  });
+}
+
+/* 입력 */
+const cv=$('#cv'),g=cv.getContext('2d');
+let px=W/2,dir=0,tx=null,lastPush=0;
+addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='a')dir=-1;if(e.key==='ArrowRight'||e.key==='d')dir=1});
+addEventListener('keyup',e=>{if(['ArrowLeft','ArrowRight','a','d'].includes(e.key))dir=0});
+const ptr=e=>{const r=cv.getBoundingClientRect();tx=(e.clientX-r.left)/r.width*W};
+cv.addEventListener('pointerdown',ptr);cv.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='touch')ptr(e)});
+
+/* 렌더 루프 */
+let last=performance.now();
+function loop(t){
+  const dt=Math.min(.05,(t-last)/1000);last=t;
+  const opx=px;px+=dir*420*dt;if(tx!==null)px+=(tx-px)*Math.min(1,dt*14);
+  px=Math.max(24,Math.min(W-24,px));if(Math.abs(px-opx)>.3){meMove.m=performance.now();meMove.d=Math.sign(px-opx)}
+  if(db&&uid&&Date.now()-lastPush>100&&Math.round(px)!==lastX){lastPush=Date.now();lastX=Math.round(px);set(base('pos/'+uid),lastX).catch(()=>{})}
+  draw();advance();requestAnimationFrame(loop);
+}
+function draw(){
+  if(late){g.clearRect(0,0,W,H);return}
+  g.clearRect(0,0,W,H);
+  g.fillStyle='rgba(233,196,106,.9)';g.beginPath();g.arc(350,150,26,0,7);g.fill();
+  g.fillStyle='rgba(255,255,255,.06)';g.fillRect(0,PY+30,W,H);
+  // 인원이 많을수록 캐릭터와 글자를 줄여서 한 화면에 담음 (15명 ≈ 50%)
+  const act=Object.entries(players).filter(([,p])=>!p.wait),n=Math.max(1,act.length),S=Math.max(.42,Math.min(1,Math.pow(6/n,.75))),L=.6+.4*S;
+  const fnt=k=>`700 ${Math.round(26*L*k)}px 'Gowun Batang',serif`;
+  g.textAlign='center';g.textBaseline='middle';
+  if(state&&state.status==='playing'&&state.startedAt){
+    const el=now()-state.startedAt,hi=Math.floor(el/SPAWN),lo=Math.max(0,Math.floor((el-FALL)/SPAWN));
+    g.font=fnt(1);
+    for(let i=lo;i<=hi;i++){
+      if(collected[i]||pending.has(i))continue;   // 누군가 가져간 글자는 모두에게서 사라짐
+      const y=(el-i*SPAWN)/FALL*(PY+40)-20,x=xAt(state.seed,i),ch=letterAt(state.seed,state.order[state.qIndex],i);
+      g.fillStyle='#cfe8da';g.beginPath();g.arc(x,y,24*L,0,7);g.fill();
+      g.strokeStyle='#e8789f';g.lineWidth=2;g.stroke();
+      g.fillStyle='#1d2a3f';g.fillText(ch,x,y+1);
+      if(hitHead(x,y,px,S,L))claim(i,ch,x,y);
+    }
+  }
+  // 획득 효과: 내가 먹으면 +10, 남이 먹으면 터지며 사라짐
+  for(let k=fx.length-1;k>=0;k--){
+    const f=fx[k],a=(performance.now()-f.t)/450;if(a>=1){fx.splice(k,1);continue}
+    g.globalAlpha=1-a;g.strokeStyle=f.mine?(f.delta<0?'#ff6b6b':'#e9c46a'):'#e8789f';g.lineWidth=3;
+    g.beginPath();g.arc(f.x,f.y,24*L*(1+a*.8),0,7);g.stroke();
+    g.fillStyle='#cfe8da';g.font=fnt(1);g.fillText(f.ch,f.x,f.y+1);
+    if(f.mine){g.fillStyle=f.delta<0?'#ff6b6b':'#e9c46a';g.font=fnt(.8);g.fillText(f.delta>0?'+10':f.delta<0?'-5':'+0',f.x,f.y-28*L-a*30)}
+    g.globalAlpha=1;
+  }
+  // 플레이어 (내 캐릭터가 항상 맨 위)
+  act.sort((a,b)=>(a[0]===uid)-(b[0]===uid)).forEach(([k,p])=>{
+    const mine=k===uid,tx0=posMap[k]??W/2,v=vis[k]||(vis[k]={x:tx0,m:0,d:1});
+    if(!mine){const o=v.x;v.x+=(tx0-v.x)*.3;if(Math.abs(v.x-o)>.25){v.m=performance.now();v.d=Math.sign(v.x-o)}}
+    const dx=mine?px:v.x;g.globalAlpha=mine?1:.7;
+    if(p.look)drawChar(g,spriteCv(p.look),dx,mine?meMove:v,S);
+    if(mine||n<=8){g.font=`${mine?14:13}px 'Gowun Batang',serif`;g.fillStyle=mine?'#e9c46a':'#f3efe4';g.fillText(p.name,dx,PY+30)}
+    g.globalAlpha=1;
+    if(mine&&n>1){const ty=PY+17-69*S-8;g.fillStyle='#e9c46a';g.beginPath();g.moveTo(dx-6,ty-9);g.lineTo(dx+6,ty-9);g.lineTo(dx,ty);g.fill()}
+  });
+  if(state&&state.status==='playing'&&state.startedAt&&now()<state.startedAt){
+    const sec=Math.ceil((state.startedAt-now())/1000);g.fillStyle='rgba(16,22,36,.55)';g.fillRect(0,0,W,H);
+    g.textAlign='center';g.textBaseline='middle';g.fillStyle='#e9c46a';g.font="700 120px 'Gowun Batang',serif";g.fillText(sec,W/2,H/2);
+    g.font="20px 'Gowun Batang',serif";g.fillStyle='#f3efe4';g.fillText('곧 시작합니다',W/2,H/2+90);
+  }
+  if(players[uid])$('#myscore').textContent=`내 점수 ${players[uid].score||0}`;
+}
+</script>
+</body>
+</html>
