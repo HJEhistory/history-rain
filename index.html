@@ -6,68 +6,77 @@
 <title>부여 글자비</title>
 <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#1d2a3f;--bg2:#3b5668;--ink:#f3efe4;--jade:#cfe8da;--lotus:#e8789f;--gold:#e9c46a;--card:rgba(255,255,255,.09)}
+:root{
+  --bg:#1d2a3f;--bg2:#3b5668;--ink:#f3efe4;--jade:#cfe8da;--lotus:#e8789f;--gold:#e9c46a;--card:rgba(255,255,255,.09);
+  --ui-scale:1;
+}
 *{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--ink);font-family:'Gowun Batang',serif;-webkit-user-select:none;user-select:none;touch-action:manipulation;overflow:hidden}
 body{display:flex;align-items:center;justify-content:center;padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
-#app{width:min(100vw,1280px);height:min(100vh,calc(100vw * 9 / 16));max-height:100vh;position:relative;background:linear-gradient(#1d2a3f,#3b5668 85%,#4f6e72);box-shadow:0 12px 40px rgba(0,0,0,.45);border-radius:12px;overflow:hidden}
-@media (max-aspect-ratio: 16/10){
-  #app{width:min(100vw,calc(100vh * 16 / 9));height:min(100vh,calc(100vw * 9 / 16))}
+#app{
+  width:1280px;height:720px;
+  position:relative;
+  background:linear-gradient(#1d2a3f,#3b5668 85%,#4f6e72);
+  box-shadow:0 12px 40px rgba(0,0,0,.45);
+  border-radius:calc(12px * var(--ui-scale));
+  overflow:hidden;
+  transform-origin:center center;
+  will-change:transform;
 }
-.screen{position:absolute;inset:0;display:none;flex-direction:column;padding:20px 28px;overflow:auto}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;padding:calc(20px * var(--ui-scale)) calc(28px * var(--ui-scale));overflow:auto}
 .screen.on{display:flex}
-h1{font-size:30px;margin:4px 0;letter-spacing:.04em}
-.sub{opacity:.78;margin:0 0 12px;font-size:15px}
-.row{display:flex;gap:10px;align-items:center;margin:10px 0}
-.name{flex:1;padding:10px 14px;border-radius:12px;background:var(--card);font-size:19px}
-button.btn{font-family:inherit;font-size:16px;padding:10px 18px;border-radius:12px;border:0;background:var(--lotus);color:#2a1020;font-weight:700;cursor:pointer}
+h1{font-size:calc(30px * var(--ui-scale));margin:calc(4px * var(--ui-scale)) 0;letter-spacing:.04em}
+.sub{opacity:.78;margin:0 0 calc(12px * var(--ui-scale));font-size:calc(15px * var(--ui-scale))}
+.row{display:flex;gap:calc(10px * var(--ui-scale));align-items:center;margin:calc(10px * var(--ui-scale)) 0}
+.name{flex:1;padding:calc(10px * var(--ui-scale)) calc(14px * var(--ui-scale));border-radius:calc(12px * var(--ui-scale));background:var(--card);font-size:calc(19px * var(--ui-scale))}
+button.btn{font-family:inherit;font-size:calc(16px * var(--ui-scale));padding:calc(10px * var(--ui-scale)) calc(18px * var(--ui-scale));border-radius:calc(12px * var(--ui-scale));border:0;background:var(--lotus);color:#2a1020;font-weight:700;cursor:pointer}
 button.btn.ghost{background:var(--card);color:var(--ink)}
 button.btn:disabled{opacity:.4}
-#cfgwarn{background:#7a2e3a;padding:10px;border-radius:10px;display:none;margin-top:10px;font-size:14px}
+#cfgwarn{background:#7a2e3a;padding:calc(10px * var(--ui-scale));border-radius:calc(10px * var(--ui-scale));display:none;margin-top:calc(10px * var(--ui-scale));font-size:calc(14px * var(--ui-scale))}
 
 /* 가로형 입장 화면 */
-#joinGrid{display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:center;margin:auto 0}
-#pvwrap{display:flex;flex-direction:column;gap:10px;align-items:center}
-#pv{width:130px;height:150px;image-rendering:pixelated;background:var(--card);border-radius:14px}
-.prow{display:flex;gap:6px;align-items:center;margin:8px 0;flex-wrap:wrap}
-.prow b{width:64px;font-weight:400;opacity:.8;font-size:14px}
-.opt{padding:6px 11px;border-radius:10px;border:2px solid transparent;background:var(--card);color:var(--ink);font-family:inherit;font-size:14px;cursor:pointer}
+#joinGrid{display:grid;grid-template-columns:calc(280px * var(--ui-scale)) 1fr;gap:calc(24px * var(--ui-scale));align-items:center;margin:auto 0}
+#pvwrap{display:flex;flex-direction:column;gap:calc(10px * var(--ui-scale));align-items:center}
+#pv{width:calc(130px * var(--ui-scale));height:calc(150px * var(--ui-scale));image-rendering:pixelated;background:var(--card);border-radius:calc(14px * var(--ui-scale))}
+.prow{display:flex;gap:calc(6px * var(--ui-scale));align-items:center;margin:calc(8px * var(--ui-scale)) 0;flex-wrap:wrap}
+.prow b{width:calc(64px * var(--ui-scale));font-weight:400;opacity:.8;font-size:calc(14px * var(--ui-scale))}
+.opt{padding:calc(6px * var(--ui-scale)) calc(11px * var(--ui-scale));border-radius:calc(10px * var(--ui-scale));border:2px solid transparent;background:var(--card);color:var(--ink);font-family:inherit;font-size:calc(14px * var(--ui-scale));cursor:pointer}
 .opt.sel{border-color:var(--lotus)}
-.opt.sw{width:30px;height:30px;padding:0;border-radius:50%}
-#enter{margin-top:10px;align-self:flex-start;min-width:160px}
+.opt.sw{width:calc(30px * var(--ui-scale));height:calc(30px * var(--ui-scale));padding:0;border-radius:50%}
+#enter{margin-top:calc(10px * var(--ui-scale));align-self:flex-start;min-width:calc(160px * var(--ui-scale))}
 
 /* 가로형 대기실 */
-#lobbyGrid{display:grid;grid-template-columns:1.1fr .9fr;gap:24px;flex:1;min-height:0;align-items:start}
-#lobbyList{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;max-height:220px;overflow:auto}
-.chip{background:var(--card);padding:6px 12px;border-radius:999px;font-size:15px}
-#admin{padding:14px;border:1px dashed var(--gold);border-radius:12px;display:none;background:rgba(16,22,36,.35)}
-#admin input,#admin select{width:100%;padding:9px 10px;border-radius:8px;border:0;margin-bottom:8px;font-family:inherit}
-#admin .row{margin:6px 0 0}
-#lobCount{font-size:20px;margin:4px 0 6px;color:var(--gold)}
+#lobbyGrid{display:grid;grid-template-columns:1.1fr .9fr;gap:calc(24px * var(--ui-scale));flex:1;min-height:0;align-items:start}
+#lobbyList{display:flex;flex-wrap:wrap;gap:calc(8px * var(--ui-scale));margin:calc(10px * var(--ui-scale)) 0;max-height:calc(220px * var(--ui-scale));overflow:auto}
+.chip{background:var(--card);padding:calc(6px * var(--ui-scale)) calc(12px * var(--ui-scale));border-radius:999px;font-size:calc(15px * var(--ui-scale))}
+#admin{padding:calc(14px * var(--ui-scale));border:1px dashed var(--gold);border-radius:calc(12px * var(--ui-scale));display:none;background:rgba(16,22,36,.35)}
+#admin input,#admin select{width:100%;padding:calc(9px * var(--ui-scale)) calc(10px * var(--ui-scale));border-radius:calc(8px * var(--ui-scale));border:0;margin-bottom:calc(8px * var(--ui-scale));font-family:inherit;font-size:calc(14px * var(--ui-scale))}
+#admin .row{margin:calc(6px * var(--ui-scale)) 0 0}
+#lobCount{font-size:calc(20px * var(--ui-scale));margin:calc(4px * var(--ui-scale)) 0 calc(6px * var(--ui-scale));color:var(--gold)}
 
 /* 게임 화면 */
 #game{padding:0}
-#hud{position:absolute;top:0;left:0;right:0;padding:12px 18px 24px;background:linear-gradient(rgba(16,22,36,.88),rgba(16,22,36,.35) 70%,transparent);z-index:2;pointer-events:none;display:flex;align-items:center;justify-content:space-between;gap:16px}
-#hudLeft{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
-#hint{font-size:18px;line-height:1.35}
-#slots{display:flex;gap:7px;flex-wrap:wrap}
-.slot{min-width:38px;height:40px;border-radius:8px;border:2px solid var(--jade);display:grid;place-items:center;font-size:22px;color:#1d2a3f;background:transparent;padding:0 4px}
+#hud{position:absolute;top:0;left:0;right:0;padding:calc(12px * var(--ui-scale)) calc(18px * var(--ui-scale)) calc(24px * var(--ui-scale));background:linear-gradient(rgba(16,22,36,.88),rgba(16,22,36,.35) 70%,transparent);z-index:2;pointer-events:none;display:flex;align-items:center;justify-content:space-between;gap:calc(16px * var(--ui-scale))}
+#hudLeft{display:flex;flex-direction:column;gap:calc(6px * var(--ui-scale));min-width:0;flex:1}
+#hint{font-size:calc(18px * var(--ui-scale));line-height:1.35}
+#slots{display:flex;gap:calc(7px * var(--ui-scale));flex-wrap:wrap}
+.slot{min-width:calc(38px * var(--ui-scale));height:calc(40px * var(--ui-scale));border-radius:calc(8px * var(--ui-scale));border:2px solid var(--jade);display:grid;place-items:center;font-size:calc(22px * var(--ui-scale));color:#1d2a3f;background:transparent;padding:0 calc(4px * var(--ui-scale))}
 .slot.f{background:var(--jade)}
-#meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:14px;opacity:.9;white-space:nowrap}
+#meta{display:flex;flex-direction:column;align-items:flex-end;gap:calc(4px * var(--ui-scale));font-size:calc(14px * var(--ui-scale));opacity:.9;white-space:nowrap}
 canvas{width:100%;height:100%;display:block;touch-action:none}
-#overlay{position:absolute;inset:0;z-index:3;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(20,28,44,.9);padding:24px}
+#overlay{position:absolute;inset:0;z-index:3;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(20,28,44,.9);padding:calc(24px * var(--ui-scale))}
 #overlay.on{display:flex}
-#ans{font-size:52px;font-weight:700;color:var(--gold);letter-spacing:.08em;margin:4px 0}
-#desc{max-width:560px;line-height:1.5;font-size:16px}
-#board{margin-top:12px;text-align:left;font-size:16px;min-width:280px}
-#board div{display:flex;justify-content:space-between;gap:24px;padding:3px 0}
+#ans{font-size:calc(52px * var(--ui-scale));font-weight:700;color:var(--gold);letter-spacing:.08em;margin:calc(4px * var(--ui-scale)) 0}
+#desc{max-width:calc(560px * var(--ui-scale));line-height:1.5;font-size:calc(16px * var(--ui-scale))}
+#board{margin-top:calc(12px * var(--ui-scale));text-align:left;font-size:calc(16px * var(--ui-scale));min-width:calc(280px * var(--ui-scale))}
+#board div{display:flex;justify-content:space-between;gap:calc(24px * var(--ui-scale));padding:calc(3px * var(--ui-scale)) 0}
 .px{image-rendering:pixelated}
-#lb{position:absolute;left:12px;top:102px;z-index:2;pointer-events:none;font-size:13px;line-height:1.35;background:rgba(16,22,36,.55);border-radius:10px;padding:6px 10px;min-width:140px;max-width:210px}
-#lb div{display:flex;align-items:center;gap:5px;white-space:nowrap;padding:1px 0}
+#lb{position:absolute;left:calc(12px * var(--ui-scale));top:calc(102px * var(--ui-scale));z-index:2;pointer-events:none;font-size:calc(13px * var(--ui-scale));line-height:1.35;background:rgba(16,22,36,.55);border-radius:calc(10px * var(--ui-scale));padding:calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));min-width:calc(140px * var(--ui-scale));max-width:calc(210px * var(--ui-scale))}
+#lb div{display:flex;align-items:center;gap:calc(5px * var(--ui-scale));white-space:nowrap;padding:calc(1px * var(--ui-scale)) 0}
 #lb .me{color:var(--gold);font-weight:700}
-#lb b{margin-left:auto;padding-left:8px}
-#lb .rk{width:16px;opacity:.7}
-#abort{position:absolute;right:14px;bottom:12px;z-index:2;font-size:13px;padding:7px 12px;display:none}
+#lb b{margin-left:auto;padding-left:calc(8px * var(--ui-scale))}
+#lb .rk{width:calc(16px * var(--ui-scale));opacity:.7}
+#abort{position:absolute;right:calc(14px * var(--ui-scale));bottom:calc(12px * var(--ui-scale));z-index:2;font-size:calc(13px * var(--ui-scale));padding:calc(7px * var(--ui-scale)) calc(12px * var(--ui-scale));display:none}
 </style>
 </head>
 <body>
@@ -80,7 +89,7 @@ canvas{width:100%;height:100%;display:block;touch-action:none}
       <div id="pvwrap">
         <canvas id="pv" width="20" height="23"></canvas>
         <div class="name" id="nameBox" style="width:100%;text-align:center"></div>
-        <button class="btn ghost" id="reroll" style="font-size:14px;padding:8px 14px">이름 다시 받기</button>
+        <button class="btn ghost" id="reroll" style="font-size:calc(14px * var(--ui-scale));padding:calc(8px * var(--ui-scale)) calc(14px * var(--ui-scale))">이름 다시 받기</button>
       </div>
       <div>
         <div id="picker"></div>
@@ -98,10 +107,10 @@ canvas{width:100%;height:100%;display:block;touch-action:none}
       <div>
         <div id="lobCount"></div>
         <div id="lobbyList"></div>
-        <p class="sub" style="margin-top:10px">정답에 없는 글자를 머리로 받으면 -5점이에요.</p>
+        <p class="sub" style="margin-top:calc(10px * var(--ui-scale))">정답에 없는 글자를 머리로 받으면 -5점이에요.</p>
       </div>
       <div id="admin">
-        <div style="margin-bottom:8px;font-weight:700">관리자 모드</div>
+        <div style="margin-bottom:calc(8px * var(--ui-scale));font-weight:700">관리자 모드</div>
         <input id="pass" type="password" placeholder="관리자 비밀번호">
         <select id="qcount">
           <option value="10">10문제</option>
@@ -134,7 +143,7 @@ canvas{width:100%;height:100%;display:block;touch-action:none}
       <div id="ans"></div>
       <div id="desc"></div>
       <div id="board"></div>
-      <button class="btn" id="backBtn" style="display:none;margin-top:14px">대기실로 돌아가기</button>
+      <button class="btn" id="backBtn" style="display:none;margin-top:calc(14px * var(--ui-scale))">대기실로 돌아가기</button>
     </div>
   </section>
 </div>
@@ -201,6 +210,19 @@ const $=s=>document.querySelector(s);
 const show=id=>document.querySelectorAll('.screen').forEach(e=>e.classList.toggle('on',e.id===id));
 const isAdmin=new URLSearchParams(location.search).has('admin');
 if(!firebaseConfig.apiKey)$('#cfgwarn').style.display='block';
+
+/* 가로/세로 비율 자동 조정 */
+const appEl=$('#app');
+function fitViewport(){
+  const vw=window.innerWidth||document.documentElement.clientWidth||W;
+  const vh=window.innerHeight||document.documentElement.clientHeight||H;
+  const scale=Math.min(vw/W,vh/H);
+  appEl.style.transform=`scale(${scale})`;
+  document.documentElement.style.setProperty('--ui-scale',String(scale));
+}
+fitViewport();
+addEventListener('resize',fitViewport);
+if(window.visualViewport)window.visualViewport.addEventListener('resize',fitViewport);
 
 /* 캐릭터 / 이름 */
 const SW=20,SH=23,OL='#4a3646';
